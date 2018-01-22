@@ -1,0 +1,6 @@
+1.0 (Mar 2002): First release
+1.1 (Nov 2002): Spectral density calculations
+1.2 (Feb 2004): Plant transport delays, more comments in the code
+1.21 (Feb 2006): Improved documentation
+1.22 (Apr 2010): Robust LQG design for systems with time-varying input-output delay
+1.23 (Jul 2010): Evaluation and LQG design for systems with impulse inputs

@@ -1,0 +1,11 @@
+Jitterbug 1.2 - A Matlab toolbox for real-time control performance analysis
+===========================================================================
+(C) Copyright 2004 by Bo Lincoln and Anton Cervin,
+Department of Automatic Control, Lund University, Sweden.
+
+Requirements: Matlab 6 (or later) and Control Systems Toolbox.
+Web page:     http://www.control.lth.se/jitterbug/
+Bug report:   anton@control.lth.se
+Installation: Unpack the Jitterbug archive anywhere. Add the path to your
+              Matlab path. Look under examples/
+
