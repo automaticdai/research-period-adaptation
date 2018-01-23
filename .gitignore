@@ -1,2 +1,4 @@
 **/slprj/
 **/result_*
+*.autosave
+*.mexw64

@@ -1,8 +1,16 @@
 #include <stddef.h>
+#include "simstruc.h"
 
 #include "types.h"
 #include "task.h"
 
+char *task_status_literal[] = {
+    { "ready" },
+    { "running" },
+    { "pending" },
+    { "waiting" },
+    { "deleted" }
+};
 
 void Task::on_task_ready(void) {
     c_ = C_;
@@ -38,5 +46,6 @@ void Task::set_onfinish_hook(callback onfinish)
 
 void Task::repr()
 {
+    mexPrintf("%d: %s | %d | %d | %d \r", id_,  task_status_literal[status_], c_, d_, r_);
     //std::cout << id_ << ":" << task_status_literal[status_] << " | " << c_ << " | " << d_<< " | " << r_ << "\n";
 }

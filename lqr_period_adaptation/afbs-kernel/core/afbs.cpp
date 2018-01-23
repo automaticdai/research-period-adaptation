@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "simstruc.h"
 
 #include "afbs.h"
 
@@ -13,7 +14,89 @@ long    idle_cnt;
 int     tcb_running_id;
 int     step_count = 0;
 
-/// function implementation
+/* system states */
+double states_ref[STATES_REF_NUM];
+double states_in[STATES_IN_NUM];
+double states_out[STATES_OUT_NUM];
+double param[PARAM_NUM];
+
+/*----------------------------------------------------------------------------*/
+/* Kernel Related                                                             */
+/*----------------------------------------------------------------------------*/
+void afbs_dump_information(void)
+{
+    mexPrintf("t: %d \r", kernel_cnt);
+    mexPrintf("Current Task: %d \r", tcb_running_id);
+    mexPrintf("\r Task TCB: \r");
+
+    for (int i = 0; i < TASK_MAX_NUM; i++) {
+        TCB[i].repr();
+    }
+    //cout << '\n';
+}
+
+long afbs_get_kernel_cnt(void)
+{
+    return kernel_cnt;
+}
+
+long afbs_get_idle_cnt(void)
+{
+    return idle_cnt;
+}
+
+float afbs_get_current_time(void)
+{
+    return kernel_cnt * KERNEL_TICK_TIME;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/* States Related                                                             */
+/*----------------------------------------------------------------------------*/
+void afbs_state_in_set(int idx, double value)
+{
+    states_in[idx] = value;
+}
+
+void afbs_state_ref_set(int idx, double value)
+{
+    states_ref[idx] = value;
+}
+
+void afbs_state_out_set(int idx, double value)
+{
+    states_out[idx] = value;
+}
+
+double afbs_state_in_load(int idx)
+{
+    return states_in[idx];
+}
+
+double afbs_state_ref_load(int idx)
+{
+    return states_ref[idx];
+}
+
+double afbs_state_out_load(int idx)
+{
+    return states_out[idx];
+}
+
+void afbs_set_param(int idx, double value)
+{
+    param[idx] = value;
+}
+
+double afbs_get_param(int idx)
+{
+    return param[idx];
+}
+
+/*----------------------------------------------------------------------------*/
+/* Task Related                                                               */
+/*----------------------------------------------------------------------------*/
 void afbs_initilize(enum_scheduling_policy sp)
 {
     int i = 0;
@@ -27,6 +110,11 @@ void afbs_initilize(enum_scheduling_policy sp)
 
 void afbs_create_task(CTask t, callback task_main, callback on_start, callback on_finish)
 {
+    if (t.T_ == 0) {
+        mexPrintf("Error: Task period cannot be 0!\r");
+        return;
+    }
+
     if (t.R_ == 0) {
         t.status_ = ready;
         t.on_task_ready();
@@ -72,6 +160,7 @@ void afbs_create_job(CTask j, int prio, callback job_main, callback on_start, ca
     ;
 }
 
+// [debug]
 void afbs_delete_job(int job_id)
 {
     ;
@@ -166,14 +255,4 @@ void afbs_idle(void)
     idle_cnt++;
 }
 
-void afbs_dump_information(void)
-{
-    //cout << "t: " << kernel_cnt << '\n';
-    //cout << "Current Task: " << tcb_running_id;
-    //cout << '\n';
-    //cout << "Task TCB: \n";
-    for (int i = 0; i < TASK_MAX_NUM; i++) {
-        TCB[i].repr();
-    }
-    //cout << '\n';
-}
+/*- EOF ----------------------------------------------------------------------*/

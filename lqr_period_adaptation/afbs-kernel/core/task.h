@@ -7,16 +7,6 @@ extern long kernel_cnt;
 
 typedef enum {ready, running, pending, waiting, deleted} enum_task_status;
 
-/*
-char *task_status_literal[] = {
-    { "ready" },
-    { "running" },
-    { "pending" },
-    { "waiting" },
-    { "deleted" }
-};
-*/
-
 class Task
 {
 public:

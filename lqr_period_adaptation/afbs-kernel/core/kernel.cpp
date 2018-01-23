@@ -16,15 +16,8 @@
 #include "afbs.h"
 #include "app.h"
 
-#define KERNEL_TICK_TIME        (0.000001)  // 1us by default
-#define AFBS_SAMPLING_PERIOD    (0.000030)
-
-int TASK_0_PERIOD = 100; // normal
-int TASK_1_PERIOD = 200; // slowest
-int TASK_2_PERIOD = 300; // adapative
-
 double alpha = 0;
-float  error[TASK_NUMBERS];
+float  error[CONTROL_TASK_NUMBERS];
 int    param;
 
 /*====================*
@@ -43,9 +36,9 @@ static void mdlCheckParameters(SimStruct *S)
 //     ssSetErrorStatus(S, "Parameter to S-function must be nonnegative");
 //     return;
 //   }
-  TASK_0_PERIOD = mxGetPr(ssGetSFcnParam(S, 0))[0];
-  TASK_1_PERIOD = mxGetPr(ssGetSFcnParam(S, 0))[1];
-  TASK_2_PERIOD = mxGetPr(ssGetSFcnParam(S, 0))[2];
+    for (int i = 0; i < PARAM_NUM; i++) {
+        afbs_set_param(i, mxGetPr(ssGetSFcnParam(S, 0))[i]);
+    }
 }
 #endif /* MDL_CHECK_PARAMETERS */
 
@@ -66,7 +59,6 @@ static void mdlInitializeSizes(SimStruct *S)
     } else {
         return; /* The Simulink engine reports a mismatch error. */
     }
-
 
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
@@ -125,20 +117,7 @@ static void mdlInitializeSizes(SimStruct *S)
     afbs_initilize(fps);
 
     /* create task list */
-    class Task t0(0, 2, 10, 0, 0);
-    class Task t1(1, 5, 30, 0, 0);
-    class Task t2(2, 10, 100, 0, 0);
-    class Task tau1(0, 20, TASK_0_PERIOD, 0, 0);
-    class Task tau2(4, 20, TASK_1_PERIOD, 0, 0);
-    class Task tau3(5, 20, TASK_2_PERIOD, 0, 0);
-
-    afbs_create_task(t0, NULL, NULL, NULL);
-    afbs_create_task(t1, NULL, NULL, NULL);
-    afbs_create_task(t2, NULL, NULL, NULL);
-    afbs_create_task(tau1, NULL, task_1_start_hook, task_1_finish_hook);
-    afbs_create_task(tau2, NULL, task_2_start_hook, task_2_finish_hook);
-    afbs_create_task(tau3, NULL, task_3_start_hook, task_3_finish_hook);
-
+    task_init();
 
 	/* print logs */
 	mexPrintf("---------------------------------------------- \r");
@@ -192,32 +171,25 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     real_T *s_schedule  = ssGetOutputPortRealSignal(S, 1);
     real_T *s_periods   = ssGetOutputPortRealSignal(S, 2);
 
+    /* pass s_ref and s_y to application tasks */
+    /* tasks also have their own 'beliefs' of the system states */
+    for (int i = 0; i < STATES_REF_NUM; i++) {
+        afbs_state_ref_set(i, s_ref[i]);
+    }
+
+    for (int i = 0; i < STATES_IN_NUM; i++) {
+        afbs_state_in_set(i, s_y[i]);
+    }
+
+    /* select a task to run */
     afbs_schedule();
+
+    /* run the selected task */
     afbs_run();
 
-    if (afbs_get_execution_time_left(afbs_get_running_task_id()) == 1) {
-  		switch (afbs_get_running_task_id()) {
-  	        case 3:
-  	            error[0] = abs(s_ref[0] - s_y[0]);
-  	            s_u[0] = 800 * (s_ref[0] - s_y[0]);
-  	            break;
-
-  	        case 4:
-  	            error[1] = abs(s_ref[0] - s_y[1]);
-  	            s_u[1] = 800 * (s_ref[0] - s_y[1]);
-  	            break;
-
-  	        case 5:
-  	            error[2] = abs(s_ref[0] - s_y[2]);
-  	            s_u[2] = 800 * (s_ref[0] - s_y[2]);
-  	            break;
-
-  	        case IDLE_TASK_IDX:
-  	            break;
-
-  	        default:
-  	            ;
-  		}
+    /* the kernel needs to collect the output from tasks */
+    for (int i = 0; i < STATES_OUT_NUM; i++) {
+        s_u[i] = afbs_state_out_load(i);
     }
 
     *s_schedule = afbs_get_running_task_id();
@@ -225,7 +197,6 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 	//afbs_set_period(0, int(map(y[0], 0, 1.2, 400, 800)));
 	//afbs_set_period(0, binary_output(abs(ref[0] - y[0]), 0.2, 400, 800));
 
-	// afbs_dump_information();
   /*
 	int period = afbs_get_task_period(0);
 	cnt++;
@@ -237,6 +208,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
     afbs_update();
 
+    /* record periods */
     for (int i = 0; i < TASK_NUMBERS; i++) {
         s_periods[i] = afbs_get_task_period(i);
     }
