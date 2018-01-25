@@ -9,10 +9,10 @@ CTask TCB[TASK_MAX_NUM];
 //bool ready_q[TASK_MAX_NUM];
 //bool pending_q[TASK_MAX_NUM];
 
-long    kernel_cnt;
-long    idle_cnt;
-int     tcb_running_id;
-int     step_count = 0;
+long   kernel_cnt;
+long   idle_cnt;
+int    tcb_running_id;
+int    step_count = 0;
 
 /* system states */
 double states_ref[STATES_REF_NUM];
@@ -179,13 +179,13 @@ void afbs_update(void)
             if (--TCB[i].r_ == 0) {
                 TCB[i].status_ = ready;
                 TCB[i].on_task_ready();
+                // check if a task missed its deadline
             }
         }
     }
 
     // if current task is finished, set current task to IDLE
-    if (TCB[tcb_running_id].c_ == 0)
-    {
+    if (TCB[tcb_running_id].c_ == 0) {
         tcb_running_id = IDLE_TASK_IDX;
     }
 

@@ -37,27 +37,30 @@ void task_1_start_hook(void)
     return;
 }
 
-void task_2_start_hook(void)
-{
-    return;
-}
-
-void task_3_start_hook(void)
-{
-    return;
-}
-
-
 void task_1_finish_hook(void)
 {
-    double error = ref - y;
-    double u = error * 0.618;
+    double N = 0.1005;
+    double K = 0.0499;
+    double C = 100;
+    
+    double x = y / C;
+    double u = -1 * K * x + N * ref;
     afbs_state_out_set(0, u);
     mexPrintf("[%0.4f] Task 1 finished \r", afbs_get_current_time());
     return;
 }
 
+void task_2_start_hook(void)
+{
+    return;
+}
+
 void task_2_finish_hook(void)
+{
+    return;
+}
+
+void task_3_start_hook(void)
 {
     return;
 }
