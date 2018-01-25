@@ -19,7 +19,7 @@ cd('..')
 
 %% Simulation parameters
 simu.time = 10.0;
-simu.samlping_time = 0.010;
+simu.samlping_time = 0.001;
 
 opt.noise_level = 0.00;
 opt.disturbance_on = 0;
@@ -35,7 +35,7 @@ plant = tf([10],[tau 1]);
 t = [0:simu.samlping_time:simu.time]';
 
 rng(1);ref_sequence = randi(5, 1, 50) - 1;
-ref_sampling_time = 0.1;
+ref_sampling_time = 2;
 sim('reference_generator');
 
 ref = ref.data;

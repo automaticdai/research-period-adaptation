@@ -1,9 +1,9 @@
 #include "afbs.h"
 #include "app.h"
 
-int TASK_1_PERIOD = 0; // normal
-int TASK_2_PERIOD = 0; // slowest
-int TASK_3_PERIOD = 0; // adapative
+int TASK_1_PERIOD = 200; // normal
+int TASK_2_PERIOD = 300; // slowest
+int TASK_3_PERIOD = 400; // adapative
 
 void task_init(void)
 {

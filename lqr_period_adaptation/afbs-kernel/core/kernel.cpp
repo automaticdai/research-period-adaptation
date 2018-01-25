@@ -155,29 +155,28 @@ static void mdlInitializeConditions(SimStruct *S)
 } /* end mdlInitializeConditions */
 
 
-long cnt;
 /* Function: mdlOutputs =======================================================
  * Abstract:
  *      y = xD, and update the zoh internal output.
  */
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
-    int_T nOutputPorts  = ssGetNumOutputPorts(S);
-
+    int_T nInputPorts  = ssGetNumInputPorts(S);
     const real_T *s_ref = ssGetInputPortRealSignal(S, 0);
     const real_T *s_y   = ssGetInputPortRealSignal(S, 1);
 
+    int_T nOutputPorts  = ssGetNumOutputPorts(S);
     real_T *s_u         = ssGetOutputPortRealSignal(S, 0);
     real_T *s_schedule  = ssGetOutputPortRealSignal(S, 1);
     real_T *s_periods   = ssGetOutputPortRealSignal(S, 2);
 
     /* pass s_ref and s_y to application tasks */
     /* tasks also have their own 'beliefs' of the system states */
-    for (int i = 0; i < STATES_REF_NUM; i++) {
+    for (int i = 0; i < ssGetInputPortWidth(S, 0); i++) {
         afbs_state_ref_set(i, s_ref[i]);
     }
 
-    for (int i = 0; i < STATES_IN_NUM; i++) {
+    for (int i = 0; i < ssGetInputPortWidth(S, 1); i++) {
         afbs_state_in_set(i, s_y[i]);
     }
 
@@ -192,7 +191,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
         s_u[i] = afbs_state_out_load(i);
     }
 
-    *s_schedule = afbs_get_running_task_id();
+    s_schedule[0] = (double)afbs_get_running_task_id();
 
 	//afbs_set_period(0, int(map(y[0], 0, 1.2, 400, 800)));
 	//afbs_set_period(0, binary_output(abs(ref[0] - y[0]), 0.2, 400, 800));
@@ -209,9 +208,10 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     afbs_update();
 
     /* record periods */
-    for (int i = 0; i < TASK_NUMBERS; i++) {
+    for (int i = 0; i < ssGetOutputPortWidth(S, 2); i++) {
         s_periods[i] = afbs_get_task_period(i);
     }
+
 
 } /* end mdlOutputs */
 

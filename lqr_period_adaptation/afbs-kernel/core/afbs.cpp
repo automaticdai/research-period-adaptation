@@ -18,6 +18,8 @@ int     step_count = 0;
 double states_ref[STATES_REF_NUM];
 double states_in[STATES_IN_NUM];
 double states_out[STATES_OUT_NUM];
+
+/* s-func parameters from Simulink */
 double param[PARAM_NUM];
 
 /*----------------------------------------------------------------------------*/
@@ -106,6 +108,8 @@ void afbs_initilize(enum_scheduling_policy sp)
     }
     tcb_running_id = IDLE_TASK_IDX;
     step_count = 0;
+    kernel_cnt = 0;
+    idle_cnt = 0;
 }
 
 void afbs_create_task(CTask t, callback task_main, callback on_start, callback on_finish)
