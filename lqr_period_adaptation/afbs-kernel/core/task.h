@@ -15,10 +15,10 @@ public:
     int D_;
     int T_;
     int R_;
-    int c_; // computation time countdown
-    int d_; // deadline countdown
-    int r_; // next release countdown
-    int cnt_; // release count
+    int c_;     // computation time countdown
+    int d_;     // deadline countdown
+    int r_;     // next release countdown
+    int cnt_;   // release count
 
     enum_task_status status_;
     callback onstart_hook_;
@@ -46,6 +46,7 @@ public:
     void on_task_ready(void);
     void on_task_start(void);
     void on_task_finish(void);
+    void on_task_missed_deadline(void);
     void set_onstart_hook(callback onstart);
     void set_onfinish_hook(callback onfinish);
     void repr(void);

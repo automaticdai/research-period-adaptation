@@ -19,6 +19,10 @@ void Task::on_task_ready(void) {
     cnt_++;
 }
 
+void Task::on_task_missed_deadline() {
+    ;
+}
+
 void Task::on_task_start(void) {
     //cout << "t:" << kernel_cnt << ", r" << '(' << id_ << ',' << cnt_ << ')' << '\n';
     if (onstart_hook_ != NULL) {

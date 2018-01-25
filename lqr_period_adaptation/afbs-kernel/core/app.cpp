@@ -9,9 +9,9 @@ void task_init(void)
 {
     TASK_1_PERIOD = afbs_get_param(0);
 
-    class Task t0(0, 2, 10, 0, 0);
-    class Task t1(1, 5, 30, 0, 0);
-    class Task t2(2, 10, 100, 0, 0);
+    class Task t0(0, 5, 10, 0, 0);
+    class Task t1(1, 5, 15, 0, 0);
+    class Task t2(2, 2, 20, 0, 0);
     class Task tau1(3, 20, TASK_1_PERIOD, 0, 0);
     //class Task tau2(4, 20, TASK_2_PERIOD, 0, 0);
     //class Task tau3(5, 20, TASK_3_PERIOD, 0, 0);
@@ -42,7 +42,7 @@ void task_1_finish_hook(void)
     double N = 0.1005;
     double K = 0.0499;
     double C = 100;
-    
+
     double x = y / C;
     double u = -1 * K * x + N * ref;
     afbs_state_out_set(0, u);
