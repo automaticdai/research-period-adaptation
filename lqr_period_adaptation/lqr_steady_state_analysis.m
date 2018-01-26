@@ -9,7 +9,7 @@ addpath('../../Toolbox/')
 %% initialization
 r_end = 0;
 tss_a = [];
-h = mpc_param.Ts;
+h = g_Ts;
 
 
 %% start iteration
@@ -31,13 +31,13 @@ while true
 
     tss = compute_steady_state_time(y(r_start:r_end), t(r_start:r_end), ref(r_start), 0.05);
 
-    % if tss = -1 means did not reach steady-state
+    % if tss = NaN means the system did not reach steady-state
     tss_a = [tss_a tss];
 end
 
 
 %% plot and save result
-boxplot(tss_a, h);
+boxplot(tss_a);
 i = i + 1;
 
 %filename = sprintf('tss_%0.2f.mat', h);

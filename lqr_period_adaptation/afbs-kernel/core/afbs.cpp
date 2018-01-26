@@ -3,6 +3,9 @@
 
 #include "afbs.h"
 
+//#define AFBS_DEBUG_ON   (1)
+//#define AFBS_WARNING_ON (1)
+
 CTask TCB[TASK_MAX_NUM];
 //enum_task_status task_status_list[TASK_MAX_NUM];
 
@@ -47,7 +50,7 @@ long afbs_get_idle_cnt(void)
     return idle_cnt;
 }
 
-float afbs_get_current_time(void)
+double afbs_get_current_time(void)
 {
     return kernel_cnt * KERNEL_TICK_TIME;
 }
@@ -115,7 +118,9 @@ void afbs_initilize(enum_scheduling_policy sp)
 void afbs_create_task(CTask t, callback task_main, callback on_start, callback on_finish)
 {
     if (t.T_ == 0) {
-        mexPrintf("Error: Task period cannot be 0!\r");
+        #ifdef AFBS_WARNING_ON
+            mexPrintf("Error: Task period cannot be 0!\r");
+        #endif
         return;
     }
 
@@ -172,18 +177,21 @@ void afbs_delete_job(int job_id)
 
 void afbs_update(void)
 {
-    kernel_cnt++;
-
     for (int i = 0; i < TASK_MAX_NUM; i++) {
         if (TCB[i].status_ != deleted) {
             if (--TCB[i].r_ == 0) {
                 // check if a task missed its deadline
                 if (TCB[i].c_ != 0) {
                     TCB[i].on_task_missed_deadline();
-                    mexPrintf("Task deadline missed! \r");
+                    #ifdef AFBS_DEBUG_ON
+                        mexPrintf("[%0.4f] Task %d deadline missed! \r", afbs_get_current_time(), i);
+                    #endif
                 } else {
                     TCB[i].status_ = ready;
                     TCB[i].on_task_ready();
+                    #ifdef AFBS_DEBUG_ON
+                        mexPrintf("[%0.4f] Task %d ready! \r", afbs_get_current_time(), i);
+                    #endif
                 }
             }
         }
@@ -240,6 +248,9 @@ void  afbs_schedule(void) {
     if ((task_to_be_scheduled != tcb_running_id) &&
        (TCB[task_to_be_scheduled].c_ == TCB[task_to_be_scheduled].C_)) {
         TCB[task_to_be_scheduled].on_task_start();
+        #ifdef AFBS_DEBUG_ON
+            mexPrintf("[%0.4f] Task %d started! \r", afbs_get_current_time(), task_to_be_scheduled);
+        #endif
     }
 
     TCB[task_to_be_scheduled].status_ = ready;
@@ -248,14 +259,21 @@ void  afbs_schedule(void) {
 
 void afbs_run(void) {
     if (tcb_running_id != IDLE_TASK_IDX) {
+        #ifdef AFBS_DEBUG_ON
+            mexPrintf("[%0.4f] Running Task %d\r", afbs_get_current_time(), tcb_running_id);
+        #endif
+        kernel_cnt++;
         if (--TCB[tcb_running_id].c_ == 0) {
             TCB[tcb_running_id].status_ = waiting;
             TCB[tcb_running_id].on_task_finish();
-            //cout << 'f';
+            #ifdef AFBS_DEBUG_ON
+                mexPrintf("[%0.4f] Task %d finished! \r", afbs_get_current_time(), tcb_running_id);
+            #endif
         }
     }
     else {
         afbs_idle();
+        kernel_cnt++;
     }
 }
 

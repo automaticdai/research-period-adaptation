@@ -44,7 +44,7 @@ void afbs_dump_information(void);
 
 long afbs_get_kernel_cnt(void);
 long afbs_get_idle_cnt(void);
-float afbs_get_current_time(void);
+double afbs_get_current_time(void);
 
 void afbs_state_in_set(int, double);
 void afbs_state_ref_set(int, double);

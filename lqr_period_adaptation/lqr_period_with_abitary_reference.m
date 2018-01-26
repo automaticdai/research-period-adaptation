@@ -7,13 +7,16 @@
 
 close all;
 addpath('./afbs-kernel/')
+addpath('./afbs-kernel/core')
+addpath('./toolbox/')
 
 global g_Ts;
 g_Ts = 1;
 
 %% Compile the Kernel
 cd('afbs-kernel')
-run('setup_env.m')
+mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
+       ./core/task.cpp
 cd('..')
 
 %% Simulation parameters
@@ -33,7 +36,7 @@ plant = tf([10],[tau 1]);
 % references
 t = [0:simu.samlping_time:simu.time]';
 
-rng(1);ref_sequence = randi(5, 1, 50) - 1;
+rng(1);ref_sequence = randi(6, 1, 50);
 ref_sampling_time = 2;
 sim('reference_generator');
 
@@ -65,7 +68,6 @@ N_bar = rscale(A, B, C, D, K);
 
 %% Run Simulink model
 mdl = 'lqr_period_with_r_and_d_simulink';
-%mdl = 'pid_simulink_with_r_and_d';
 open_system(mdl);
 sim(mdl);
 
@@ -77,5 +79,3 @@ state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0
 control_cost = compute_quadratic_control_cost(0, u, simu.samlping_time, 0, 0, 1);
 fprintf('State cost: %f \r\n', state_cost);
 fprintf('Control cost: %f \r\n', control_cost);
-
-rmpath('../../Toolbox/')
