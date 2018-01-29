@@ -4,7 +4,7 @@
 #include "afbs.h"
 
 //#define AFBS_DEBUG_ON   (1)
-//#define AFBS_WARNING_ON (1)
+#define AFBS_WARNING_ON (1)
 
 CTask TCB[TASK_MAX_NUM];
 //enum_task_status task_status_list[TASK_MAX_NUM];
@@ -183,7 +183,7 @@ void afbs_update(void)
                 // check if a task missed its deadline
                 if (TCB[i].c_ != 0) {
                     TCB[i].on_task_missed_deadline();
-                    #ifdef AFBS_DEBUG_ON
+                    #ifdef AFBS_WARNING_ON
                         mexPrintf("[%0.4f] Task %d deadline missed! \r", afbs_get_current_time(), i);
                     #endif
                 } else {
@@ -245,7 +245,7 @@ void  afbs_schedule(void) {
     }
 
     // task scheduled hook
-    if ((task_to_be_scheduled != tcb_running_id) &&
+    if ((task_to_be_scheduled != IDLE_TASK_IDX) &&
        (TCB[task_to_be_scheduled].c_ == TCB[task_to_be_scheduled].C_)) {
         TCB[task_to_be_scheduled].on_task_start();
         #ifdef AFBS_DEBUG_ON

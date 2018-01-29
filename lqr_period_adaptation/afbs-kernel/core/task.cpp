@@ -20,7 +20,9 @@ void Task::on_task_ready(void) {
 }
 
 void Task::on_task_missed_deadline() {
-    ;
+    d_ = D_;
+    r_ = T_;
+    cnt_++;
 }
 
 void Task::on_task_start(void) {
