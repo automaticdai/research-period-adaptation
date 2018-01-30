@@ -6,9 +6,17 @@
 
 addpath('../../Toolbox/')
 
+global g_Ts;
+
 %% initialization
 r_end = 0;
 tss_a = [];
+j_a = [];
+
+% previous reference
+ref_p = 0; 
+alpha = 1;
+
 h = g_Ts;
 
 
@@ -30,15 +38,23 @@ while true
     %plot(r_start:r_end, ref(r_start:r_end)); hold on;
 
     tss = compute_steady_state_time(y(r_start:r_end), t(r_start:r_end), ref(r_start), 0.05);
+    
+    alpha = 1.0 / (ref(r_start) - ref_p);
+    j = compute_quadratic_control_cost(alpha * (ref(r_start) - y(r_start:r_end)), ...
+            u(r_start:r_end), simu.samlping_time, 1, 0, 0);
 
     % if tss = NaN means the system did not reach steady-state
     tss_a = [tss_a tss];
+    j_a = [j_a j];
+    
+    ref_p = ref(r_start);
 end
 
 
 %% plot and save result
 boxplot(tss_a);
+boxplot(j_a);
 i = i + 1;
 
-%filename = sprintf('tss_%0.2f.mat', h);
-%save(filename,'tss_a','h');
+filename = sprintf('tss_%d.mat', g_Ts);
+save(['./result/' filename], 'tss_a', 'j_a', 'g_Ts');

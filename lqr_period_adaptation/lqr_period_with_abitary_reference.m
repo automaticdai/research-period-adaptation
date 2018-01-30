@@ -11,7 +11,6 @@ addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
 global g_Ts;
-g_Ts = 1;
 
 %% Compile the Kernel
 cd('afbs-kernel')
@@ -20,10 +19,16 @@ mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
 cd('..')
 
 %% Simulation parameters
-simu.time = 10.0;
+% controller periods
+g_Ts = 100;
+
+% task periods
+parameters = [g_Ts];
+
+simu.time = 100.0;
 simu.samlping_time = 0.001;
 
-opt.noise_level = 0.00;
+opt.noise_level = 0.01;
 opt.disturbance_on = 0;
 
 %% System dynamic model
@@ -37,7 +42,7 @@ plant = tf([10],[tau 1]);
 t = [0:simu.samlping_time:simu.time]';
 
 rng(1);ref_sequence = randi(6, 1, 50);
-ref_sampling_time = 2;
+ref_sampling_time = 1.91;
 sim('reference_generator');
 
 ref = ref.data;
@@ -71,8 +76,8 @@ mdl = 'lqr_period_with_r_and_d_simulink';
 open_system(mdl);
 sim(mdl);
 
-filename = sprintf('Ts_%0.2f.mat', g_Ts);
-save(filename, 'plant', 't', 'ref', 'y', 'u');
+%filename = sprintf('Ts_%d.mat', g_Ts);
+%save(filename, 'plant', 't', 'ref', 'y', 'u');
 
 %% output error
 state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0, 0);

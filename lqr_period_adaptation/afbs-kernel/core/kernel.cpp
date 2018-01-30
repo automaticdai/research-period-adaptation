@@ -193,18 +193,6 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
     s_schedule[0] = (double)afbs_get_running_task_id();
 
-	//afbs_set_period(0, int(map(y[0], 0, 1.2, 400, 800)));
-	//afbs_set_period(0, binary_output(abs(ref[0] - y[0]), 0.2, 400, 800));
-
-  /*
-	int period = afbs_get_task_period(0);
-	cnt++;
-	if ((cnt > 100) && (period < 1000)) {
-		afbs_set_task_period(0, period + 10);
-		cnt = 0;
-	}
-  */
-
     afbs_update();
 
     /* record periods */

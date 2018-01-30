@@ -201,33 +201,12 @@ void afbs_update(void)
     if (TCB[tcb_running_id].c_ == 0) {
         tcb_running_id = IDLE_TASK_IDX;
     }
-
-    // feedback scheduling handler
-    // a little bit hacking
-    //if (kernel_cnt % (int)(AFBS_SAMPLING_PERIOD / KERNEL_TICK_TIME) == 0) {
-        // state feedback
-        //TCB[1].T_ = floor(TASK_1_PERIOD * pow(exp(1.0), (-10.0 * error[1])) + TASK_1_PERIOD);
-
-        // dual-priority
-        //if (error[2] > 0.3) {
-        //if (step_count <= alpha * 1000) {
-            /*
-            if (TCB[2].T_ != 20) {
-                TCB[2].r_ = 1;
-            }*/
-        //    TCB[0].T_ = TASK_1_PERIOD;
-        //}
-        //else {
-        //    TCB[0].T_ = TASK_2_PERIOD;
-        //}
-        //step_count += 1;
-    //}
-
 }
 
 void  afbs_schedule(void) {
     int task_to_be_scheduled = IDLE_TASK_IDX;
 
+    // find the next task to run
     for (int i = 0; i < TASK_MAX_NUM; i++)
     {
         if ((TCB[i].status_ == ready) || (TCB[i].status_ == pending)) {
@@ -236,6 +215,7 @@ void  afbs_schedule(void) {
         }
     }
 
+    // set lower-priority tasks to pending
     if ((task_to_be_scheduled != IDLE_TASK_IDX)) {
         for (int i = task_to_be_scheduled + 1; i < TASK_MAX_NUM; i++) {
             if (TCB[i].status_ == ready) {
@@ -244,7 +224,7 @@ void  afbs_schedule(void) {
         }
     }
 
-    // task scheduled hook
+    // run task scheduled hook
     if ((task_to_be_scheduled != IDLE_TASK_IDX) &&
        (TCB[task_to_be_scheduled].c_ == TCB[task_to_be_scheduled].C_)) {
         TCB[task_to_be_scheduled].on_task_start();
