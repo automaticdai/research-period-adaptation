@@ -25,7 +25,7 @@ g_Ts = 100;
 % task periods
 parameters = [g_Ts];
 
-simu.time = 100.0;
+simu.time = 1000.0;
 simu.samlping_time = 0.001;
 
 opt.noise_level = 0.01;
@@ -42,7 +42,7 @@ plant = tf([10],[tau 1]);
 t = [0:simu.samlping_time:simu.time]';
 
 rng(1);ref_sequence = randi(6, 1, 50);
-ref_sampling_time = 1.91;
+ref_sampling_time = 2.91;
 sim('reference_generator');
 
 ref = ref.data;

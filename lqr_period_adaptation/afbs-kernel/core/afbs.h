@@ -10,7 +10,6 @@
 
 /* Scheduler Kernel Variables */
 #define KERNEL_TICK_TIME     (0.001000)                 // 1us by default
-#define AFBS_SAMPLING_PERIOD (0.000030)
 #define TASK_MAX_NUM         (7)
 #define IDLE_TASK_IDX        (TASK_MAX_NUM)
 
