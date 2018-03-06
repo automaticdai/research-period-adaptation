@@ -1,0 +1,27 @@
+[fig1]
+from analysis_tss_with_period_adapt.m
+
+int AFBS_PERIOD = 10;
+int TASK_1_PERIOD = 100;
+
+class Task afbs_task(0, 1, AFBS_PERIOD, 0, 0);
+
+class Task t1(1, 1, 11, 0, 0);
+class Task t2(2, 2, 12, 0, 0);
+class Task t3(3, 2, 15, 0, 0);
+class Task t4(4, 2, 20, 0, 0);
+class Task t5(5, 1, 10, 0, 0);
+
+class Task tau1(6, 10, TASK_1_PERIOD, 0, 0);
+
+/* policy 1 */
+if (abs(tss - tss_target) < 0.05) {
+    // hold, no action;
+}
+else if (tss <= tss_target) {
+    t_period += 5;
+    afbs_set_task_period(6, t_period);
+} else {
+    t_period -= 5;
+    afbs_set_task_period(6, t_period);
+}
