@@ -10,7 +10,7 @@ stairs(tt, xx)
 xlim = get(gca,'xlim');  %Get x range 
 hold on
 plot([xlim(1) xlim(2)],[0 0],'k')
-hline = refline([0 0.5]);
+hline = refline([0 0.25]);
 title('Steady-state time')
 
 %% plot periods

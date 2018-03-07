@@ -23,7 +23,7 @@ int task_config[TASK_NUMBERS][5] = {
 
 void task_init(void) {
 
-    for (int i  = 0; i < TASK_NUMBERS; i++)  {
+    for (int i = 0; i < TASK_NUMBERS; i++) {
         class Task t1(task_config[i][0], task_config[i][1], task_config[i][2],
                     task_config[i][3], task_config[i][4]);
         afbs_create_task(t1, NULL, NULL, NULL);
@@ -49,7 +49,7 @@ void task_init(void) {
 
 
 /*-- afbs task ---------------------------------------------------------------*/
-int    t_period = 200;
+int    t_period = 100;
 
 double ref_last = 0;
 double ref_this = 0;
@@ -61,7 +61,7 @@ int    pi_idx = 0;
 double pi_trace[100];
 
 double tss = -1;
-double tss_target = 0.5;
+double tss_target = 0.28;
 
 double analysis_steady_state_time(void) {
     int tss_idx;
@@ -89,6 +89,7 @@ void afbs_start_hook(void) {
         mexPrintf("%f, %f \r", afbs_get_current_time(), tss);
 
         /* Policy 1 */
+        /*
         if (abs(tss - tss_target) < 0.05) {
             // hold, no action;
         }
@@ -99,32 +100,35 @@ void afbs_start_hook(void) {
             t_period -= 20;
             afbs_set_task_period(TASK_1_IDX, t_period);
         }
+        */
         // end of policy
 
-
         /* Policy 2 */
-        /*
         pi_trace[pi_idx] = tss;
         pi_idx += 1;
 
-        if (pi_idx >= 5) {
-            tss = (pi_trace[0] + pi_trace[1] + pi_trace[2] + pi_trace[3] + pi_trace[4]) / 5;
+        if (pi_idx >= 100) {
+            double tss_a = 0;
+            for (int i = 0; i < 100; i++){
+                tss_a += pi_trace[i];
+            }
+            tss = tss_a / 100;
 
-            if (abs(tss - tss_target) < 0.05) {
+            if (abs(tss - tss_target) < 0.01) {
                 // hold, no action;
             }
             else if (tss <= tss_target) {
-                t_period += 5;
+                t_period += 1;
                 afbs_set_task_period(TASK_1_IDX, t_period);
             } else {
-                t_period -= 5;
+                t_period -= 1;
                 afbs_set_task_period(TASK_1_IDX, t_period);
             }
 
             pi_idx = 0;
         }
         // end of policy
-        */
+        
         y_idx = 0;
 
     }
