@@ -68,6 +68,7 @@ double analysis_steady_state_time(void) {
     int tss_idx;
 
     for (int i = 0; i < y_idx; i++) {
+        // 0.2 is steady-state error
         if ((y_trace[i] > ref_last + 0.2) || (y_trace[i] < ref_last - 0.2)) {
             tss_idx = i;
         }
@@ -94,10 +95,10 @@ void afbs_start_hook(void) {
             // hold, no action;
         }
         else if (tss <= tss_target) {
-            t_period += 10;
+            t_period += 1;
             afbs_set_task_period(6, t_period);
         } else {
-            t_period -= 10;
+            t_period -= 1;
             afbs_set_task_period(6, t_period);
         }
         // end of policy
