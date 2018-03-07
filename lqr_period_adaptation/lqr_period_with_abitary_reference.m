@@ -28,7 +28,7 @@ parameters = [g_Ts];
 simu.time = 1000.0;
 simu.samlping_time = 0.001;
 
-opt.noise_level = 0.01;
+opt.noise_level = 0;
 opt.disturbance_on = 0;
 
 %% System dynamic model

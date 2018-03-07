@@ -3,23 +3,22 @@
 #include "afbs.h"
 #include "app.h"
 
-#define TASK_NUMBERS         (7)
-#define CONTROL_TASK_NUMBERS (1)
-
 int AFBS_PERIOD = 10;
 
 int TASK_1_PERIOD = 0; // normal
 int TASK_2_PERIOD = 0; // slowest
 int TASK_3_PERIOD = 0; // adapative
 
-int tasks_config[TASK_NUMBERS][5] = {
+int TASK_1_IDX = 1;
+
+int task_config[TASK_NUMBERS][5] = {
 {0, 1, 1, 0, 0},
-{1, 1, 11, 0, 0},
+{1, 1, 12, 0, 0},
 {2, 2, 12, 0, 0},
 {3, 2, 15, 0, 0},
 {4, 2, 20, 0, 0},
 {5, 1, 10, 0, 0},
-{6, 1, 1, 0, 0}
+{6, 1, 100, 0, 0}
 };
 
 void task_init(void) {
@@ -38,7 +37,7 @@ void task_init(void) {
     TASK_2_PERIOD = afbs_get_param(1);
     TASK_3_PERIOD = afbs_get_param(2);
 
-    class Task tau1(6, 10, TASK_1_PERIOD, 0, 0);
+    class Task tau1(TASK_1_IDX, 2, TASK_1_PERIOD, 0, 0);
     //class Task tau2(7, 20, TASK_2_PERIOD, 0, 0);
     //class Task tau3(8, 20, TASK_3_PERIOD, 0, 0);
     afbs_create_task(tau1, NULL, task_1_start_hook, task_1_finish_hook);
@@ -50,7 +49,7 @@ void task_init(void) {
 
 
 /*-- afbs task ---------------------------------------------------------------*/
-int    t_period = 400;
+int    t_period = 200;
 
 double ref_last = 0;
 double ref_this = 0;
@@ -90,19 +89,18 @@ void afbs_start_hook(void) {
         mexPrintf("%f, %f \r", afbs_get_current_time(), tss);
 
         /* Policy 1 */
-        /*
         if (abs(tss - tss_target) < 0.05) {
             // hold, no action;
         }
         else if (tss <= tss_target) {
-            t_period += 1;
-            afbs_set_task_period(6, t_period);
+            t_period += 5;
+            afbs_set_task_period(TASK_1_IDX, t_period);
         } else {
-            t_period -= 1;
-            afbs_set_task_period(6, t_period);
+            t_period -= 20;
+            afbs_set_task_period(TASK_1_IDX, t_period);
         }
         // end of policy
-        */
+
 
         /* Policy 2 */
         /*
@@ -117,10 +115,10 @@ void afbs_start_hook(void) {
             }
             else if (tss <= tss_target) {
                 t_period += 5;
-                afbs_set_task_period(6, t_period);
+                afbs_set_task_period(TASK_1_IDX, t_period);
             } else {
                 t_period -= 5;
-                afbs_set_task_period(6, t_period);
+                afbs_set_task_period(TASK_1_IDX, t_period);
             }
 
             pi_idx = 0;

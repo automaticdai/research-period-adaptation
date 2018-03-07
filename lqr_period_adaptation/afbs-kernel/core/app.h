@@ -1,6 +1,9 @@
 #ifndef __APP_H_
 #define __APP_H_
 
+#define TASK_NUMBERS         (7)
+#define CONTROL_TASK_NUMBERS (1)
+
 void task_init(void);
 
 void afbs_start_hook(void);
