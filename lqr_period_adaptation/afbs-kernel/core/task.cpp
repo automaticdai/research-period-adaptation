@@ -26,7 +26,7 @@ void Task::on_task_missed_deadline() {
 }
 
 void Task::on_task_start(void) {
-    //cout << "t:" << kernel_cnt << ", r" << '(' << id_ << ',' << cnt_ << ')' << '\n';
+    //mexPrintf("Task %d started \r", id_);
     if (onstart_hook_ != NULL) {
         onstart_hook_();
     }
@@ -34,7 +34,7 @@ void Task::on_task_start(void) {
 
 
 void Task::on_task_finish(void) {
-    //cout << "t:" << kernel_cnt << ", f" << '(' << id_ << ',' << cnt_ << ')' << '\n';
+    //mexPrintf("Task %d finished \r", id_);
     if (onfinish_hook_ != NULL) {
         onfinish_hook_();
     }
@@ -53,5 +53,4 @@ void Task::set_onfinish_hook(callback onfinish)
 void Task::repr()
 {
     mexPrintf("%d: %s | %d | %d | %d \r", id_,  task_status_literal[status_], c_, d_, r_);
-    //std::cout << id_ << ":" << task_status_literal[status_] << " | " << c_ << " | " << d_<< " | " << r_ << "\n";
 }

@@ -37,7 +37,7 @@ void afbs_dump_information(void)
     for (int i = 0; i < TASK_MAX_NUM; i++) {
         TCB[i].repr();
     }
-    //cout << '\n';
+    mexPrintf("\r");
 }
 
 long afbs_get_kernel_cnt(void)

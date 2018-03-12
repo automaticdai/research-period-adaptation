@@ -25,10 +25,10 @@ g_Ts = 100;
 % task periods
 parameters = [g_Ts];
 
-simu.time = 10000.0;
+simu.time = 2000.0;
 simu.samlping_time = 0.001;
 
-opt.noise_level = 0;
+opt.noise_level = 0.01;
 opt.disturbance_on = 0;
 
 %% System dynamic model
@@ -42,7 +42,7 @@ plant = tf([10],[tau 1]);
 t = [0:simu.samlping_time:simu.time]';
 
 rng(1);ref_sequence = randi(6, 1, 50);
-ref_sampling_time = 2.91;
+ref_sampling_time = 1.9;
 sim('reference_generator');
 
 ref = ref.data;
@@ -74,13 +74,18 @@ N_bar = rscale(A, B, C, D, K);
 %% Run Simulink model
 mdl = 'lqr_period_with_r_and_d_simulink';
 open_system(mdl);
+
+
+diary('log.txt');
+diary on;
 sim(mdl);
+diary off;
 
 %filename = sprintf('Ts_%d.mat', g_Ts);
 %save(filename, 'plant', 't', 'ref', 'y', 'u');
 
 %% output error
-state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0, 0);
-control_cost = compute_quadratic_control_cost(0, u, simu.samlping_time, 0, 0, 1);
-fprintf('State cost: %f \r\n', state_cost);
-fprintf('Control cost: %f \r\n', control_cost);
+%state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0, 0);
+%control_cost = compute_quadratic_control_cost(0, u, simu.samlping_time, 0, 0, 1);
+%fprintf('State cost: %f \r\n', state_cost);
+%fprintf('Control cost: %f \r\n', control_cost);

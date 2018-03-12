@@ -9,7 +9,7 @@ int TASK_1_PERIOD = 0; // normal
 int TASK_2_PERIOD = 0; // slowest
 int TASK_3_PERIOD = 0; // adapative
 
-int TASK_1_IDX = 1;
+int TASK_1_IDX = 6;
 
 int task_config[TASK_NUMBERS][5] = {
 {0, 1, 1, 0, 0},
@@ -44,6 +44,8 @@ void task_init(void) {
     //afbs_create_task(tau2, NULL, task_2_start_hook, task_2_finish_hook);
     //afbs_create_task(tau3, NULL, task_3_start_hook, task_3_finish_hook);
 
+    mexPrintf("t_stamp, tss, j_cost \r");
+
     return;
 }
 
@@ -53,6 +55,7 @@ int    t_period = 100;
 
 double ref_last = 0;
 double ref_this = 0;
+double ref_diff = 0; // difference between references, used to normalize PI
 
 int    y_idx = 0;
 double y_trace[1000];
@@ -63,16 +66,25 @@ double pi_trace[100];
 double tss = -1;
 double tss_target = 0.28;
 
+double cost = 0;
+
 double analysis_steady_state_time(void) {
-    int tss_idx;
+    int tss_idx = 0;
 
     for (int i = 0; i < y_idx; i++) {
         // 0.2 is steady-state error
-        if ((y_trace[i] > ref_last + 0.2) || (y_trace[i] < ref_last - 0.2)) {
+        if ((y_trace[i] > ref_last + 0.05) || (y_trace[i] < ref_last - 0.05)) {
             tss_idx = i;
         }
     }
-    return tss_idx * KERNEL_TICK_TIME * AFBS_PERIOD;
+
+    cost = 0;
+    for (int i = 0; i < tss_idx; i++) {
+        cost += (y_trace[i] - ref_last) / abs(ref_diff)
+                * (y_trace[i] - ref_last) / abs(ref_diff);
+    }
+
+    return double(tss_idx) * KERNEL_TICK_TIME * AFBS_PERIOD;
 }
 
 
@@ -86,7 +98,7 @@ void afbs_start_hook(void) {
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         tss = analysis_steady_state_time();
-        mexPrintf("%f, %f \r", afbs_get_current_time(), tss);
+        mexPrintf("%f, %f, %f \r", afbs_get_current_time(), tss, cost);
 
         /* Policy 1 */
         /*
@@ -104,6 +116,7 @@ void afbs_start_hook(void) {
         // end of policy
 
         /* Policy 2 */
+        /*
         pi_trace[pi_idx] = tss;
         pi_idx += 1;
 
@@ -127,13 +140,15 @@ void afbs_start_hook(void) {
 
             pi_idx = 0;
         }
+        */
         // end of policy
-        
-        y_idx = 0;
 
+        y_idx = 0;
+        ref_diff = ref_this - ref_last;
     }
 
     ref_last = ref_this;
+
 }
 
 

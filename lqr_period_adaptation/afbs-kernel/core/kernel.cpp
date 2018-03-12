@@ -112,19 +112,22 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetOptions(S, (SS_OPTION_EXCEPTION_FREE_CODE |
                      SS_OPTION_PORT_SAMPLE_TIMES_ASSIGNED));
 
-
+     /* print logs */
+     /*
+ 	mexPrintf("---------------------------------------------- \r");
+ 	mexPrintf("| AFBS-Kernel v1.0                           | \r");
+ 	mexPrintf("| by Xiaotian Dai                            | \r");
+ 	mexPrintf("| RTS Group, Univerisyt of York (c) 2017     | \r");
+ 	mexPrintf("---------------------------------------------- \r");
+    */
+    
     /* initialize kernel */
     afbs_initilize(fps);
 
     /* create task list */
     task_init();
 
-	/* print logs */
-	mexPrintf("---------------------------------------------- \r");
-	mexPrintf("| AFBS-Kernel v1.0                           | \r");
-	mexPrintf("| by Xiaotian Dai                            | \r");
-	mexPrintf("| RTS Group, Univerisyt of York (c) 2017     | \r");
-	mexPrintf("---------------------------------------------- \r");
+
 
 } /* end mdlInitializeSizes */
 
