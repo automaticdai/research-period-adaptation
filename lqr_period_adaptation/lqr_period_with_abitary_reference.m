@@ -25,7 +25,7 @@ g_Ts = 100;
 % task periods
 parameters = [g_Ts];
 
-simu.time = 2000.0;
+simu.time = 1000.0;
 simu.samlping_time = 0.001;
 
 opt.noise_level = 0.01;

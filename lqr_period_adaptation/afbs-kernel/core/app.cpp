@@ -81,7 +81,7 @@ double analysis_steady_state_time(void) {
     cost = 0;
     for (int i = 0; i < tss_idx; i++) {
         cost += (y_trace[i] - ref_last) / abs(ref_diff)
-                * (y_trace[i] - ref_last) / abs(ref_diff);
+                * (y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME * AFBS_PERIOD;
     }
 
     return double(tss_idx) * KERNEL_TICK_TIME * AFBS_PERIOD;
