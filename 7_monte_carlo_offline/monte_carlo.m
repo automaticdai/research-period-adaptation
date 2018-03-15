@@ -5,22 +5,40 @@
 
 clear; clc;
 
+if (exist('log.txt', 'file') == 2)
+    delete('log.txt');
+end
+ 
+diary('log.txt');
+diary on;
+
 %% configurations
 % define simulation parameters
-conf.time = 1000;
+conf.simu_count = 3;
+conf.simu_time_max = 1.0;
 conf.period_min = 0.050;
 conf.period_max = 0.100;
 conf.period_step = 0.005;
 
 % define system dynamic model in state space
+%   for first order system:
+%   period should be 5% - 10% of the rising time (settling time for 1st order systems)
+%   settling time = 4 * tau
 tau = 0.1;
 plant.model = tf([10],[tau 1]);
 [A, B, C, D] = tf2ss(plant.model.num{1}, plant.model.den{1});
 plant.model_ss = ss(A,B,C,D);
 
 % define LQR controller model
-ctrl.K = 0.0499;
-ctrl.N_bar = 0.1005;
+Q = 10;
+R = 1;
+N = 0;
+[K,S,E] = lqr(A, B, Q, R, N);
+%N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
+N_bar = rscale(A, B, C, D, K);
+
+ctrl.K = K;
+ctrl.N_bar = N_bar;
 ctrl.u = 0;
 ctrl.y = 0;
 
@@ -30,14 +48,18 @@ task.wcet = 0.005;
 task.list = 0;
 
 % RTA to get BCRT and WCRT
-task.model.bcrt = 0.001;
-task.model.wcrt = 0.005;
+task.runtime.bcrt = 0.000;
+task.runtime.wcrt = 0.000;
 
+simu.count = 0;
 
 %% start simulation
-while true
+while (simu.count < conf.simu_count)
+
+simu.count = simu.count + 1;
+
 % simulation outer loop
-task.model.period = 0.100;
+task.runtime.period = 0.100;
 
 % simulation parameters
 simu.ref = 1;
@@ -55,9 +77,13 @@ simu.state = 0;
 
 % s0 -> s1
 % task start delay due to task phasing/synchronization
-simu.r = task.model.period * rand(1);
+simu.r = task.runtime.period * rand(1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+simu.r = 0;
 
-while (g_time < 2)
+while (g_time < conf.simu_time_max)
 % s1: released
 g_time = g_time + simu.r;
 %fprintf('%0.4f, release \r', g_time)
@@ -77,27 +103,30 @@ simu.state = 2;
 % s2 -> s3
 % control delay
 % roll and sample a finish time
-simu.tf = task.model.bcrt + (task.model.wcrt - task.model.bcrt) .* rand(1);
-% ode45
-tspan = [0 simu.tf];
-init_cond = [simu.x(end)];
-[t, y] = ode45(@(t,x) sys(t, x, ctrl.u, plant.model_ss), tspan, init_cond);
-simu.t = [simu.t;t + g_time];
-simu.x = [simu.x;y];
-simu.y = [simu.y;plant.model_ss.C .* y];
+simu.tf = task.runtime.bcrt + (task.runtime.wcrt - task.runtime.bcrt) .* rand(1);
+
+if (simu.tf ~= 0)
+    % ode45
+    tspan = [0 simu.tf];
+    init_cond = [simu.x(end)];
+    [t, y] = ode45(@(t,x) sys(t, x, ctrl.u, plant.model_ss), tspan, init_cond);
+    simu.t = [simu.t;t + g_time];
+    simu.x = [simu.x;y];
+    simu.y = [simu.y;plant.model_ss.C .* y];
+end
 
 % s3: change output
 % control output: u = -1 * K * x + N * ref;
 g_time = g_time + simu.tf;
 %fprintf('%0.4f, output \r', g_time)
-ctrl.u = -1 * ctrl.K * simu.x(end) + (simu.ref * ctrl.N_bar);
+ctrl.u = -1 * ctrl.K * ctrl.x + (simu.ref * ctrl.N_bar);
 
 simu.u = [simu.u; ctrl.u];
 simu.u_t = [simu.u_t; g_time];
 simu.state = 3;
 
 % s3 -> s1: wait for the next release
-simu.r = task.model.period - simu.tf;
+simu.r = task.runtime.period - simu.tf;
 % ode45
 tspan = [0 simu.r];
 init_cond = [simu.x(end)];
@@ -119,3 +148,5 @@ fprintf('%f \r', sum((simu.y - 1) .^ 2 .* t_b));
 % analysis and save result
 % save()
 end
+
+diary off;
