@@ -1,4 +1,6 @@
 #include <stddef.h>
+#include <math.h>
+
 #include "simstruc.h"
 
 #include "afbs.h"
@@ -255,11 +257,125 @@ void afbs_run(void) {
         afbs_idle();
         kernel_cnt++;
     }
+    
+    /* run monitor */
+    afbs_monitor();
 }
 
 void afbs_idle(void)
 {
     idle_cnt++;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/* Monitor Related                                                            */
+/*----------------------------------------------------------------------------*/
+int    t_period = 100;
+
+double ref_last = 0;
+double ref_this = 0;
+double ref_diff = 0; // difference between references, used to normalize PI
+
+#define TRACE_BUFFER_SIZE   (5000)
+int    y_idx = 0;
+double y_trace[TRACE_BUFFER_SIZE];
+
+#define TRACE_PI_SIZE       (100)
+int    pi_idx = 0;
+double pi_trace[TRACE_PI_SIZE];
+
+double tss = -1;
+double tss_target = 0.28;
+
+double cost = 0;
+
+double analysis_steady_state_time(void) {
+    int tss_idx = 0;
+
+    for (int i = 0; i < y_idx; i++) {
+        // 0.2 is steady-state error
+        if ((y_trace[i] > ref_last + 0.05) || (y_trace[i] < ref_last - 0.05)) {
+            tss_idx = i;
+        }
+    }
+
+    cost = 0;
+    for (int i = 0; i < tss_idx; i++) { 
+        cost += (y_trace[i] - ref_last) / abs(ref_diff) 
+             * (y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
+    }
+
+    return double(tss_idx) * KERNEL_TICK_TIME;
+}
+
+
+void afbs_monitor(void) {
+    // evaluate system performance
+    y_trace[y_idx] = afbs_state_in_load(0);
+    
+    if (y_idx < TRACE_BUFFER_SIZE - 1) {
+        y_idx += 1;
+    } else {
+        mexPrintf("Error: monitor overflowed! \r");
+    }
+
+    ref_this = afbs_state_ref_load(0);
+
+    /* check if the reference has changed */
+    if (ref_this != ref_last) {
+        tss = analysis_steady_state_time();
+        mexPrintf("%f, %f, %f \r", afbs_get_current_time(), tss, cost);
+
+        /* Policy 1 */
+        /*
+        if (abs(tss - tss_target) < 0.05) {
+            // hold, no action;
+        }
+        else if (tss <= tss_target) {
+            t_period += 5;
+            afbs_set_task_period(TASK_1_IDX, t_period);
+        } else {
+            t_period -= 20;
+            afbs_set_task_period(TASK_1_IDX, t_period);
+        }
+        */
+        // end of policy
+
+        /* Policy 2 */
+        /*
+        pi_trace[pi_idx] = tss;
+        pi_idx += 1;
+
+        if (pi_idx >= 100) {
+            double tss_a = 0;
+            for (int i = 0; i < 100; i++){
+                tss_a += pi_trace[i];
+            }
+            tss = tss_a / 100;
+
+            if (abs(tss - tss_target) < 0.01) {
+                // hold, no action;
+            }
+            else if (tss <= tss_target) {
+                t_period += 1;
+                afbs_set_task_period(TASK_1_IDX, t_period);
+            } else {
+                t_period -= 1;
+                afbs_set_task_period(TASK_1_IDX, t_period);
+            }
+
+            pi_idx = 0;
+        }
+        */
+        // end of policy
+
+        y_idx = 0;
+        ref_diff = ref_this - ref_last;
+    }
+
+    ref_last = ref_this;
+
 }
 
 /*- EOF ----------------------------------------------------------------------*/

@@ -12,6 +12,7 @@
 #define KERNEL_TICK_TIME     (0.001000)                 // 1us by default
 #define TASK_MAX_NUM         (7)
 #define IDLE_TASK_IDX        (TASK_MAX_NUM)
+#define AFBS_PERIOD          (0.010)
 
 #define STATES_REF_NUM       (1)
 #define STATES_IN_NUM        (1)
@@ -55,5 +56,7 @@ void afbs_state_out_set(int, double);
 
 void afbs_set_param(int, double);
 double afbs_get_param(int);
+
+void afbs_monitor(void);
 
 #endif

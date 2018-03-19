@@ -19,8 +19,8 @@ mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
 cd('..')
 
 %% Simulation parameters
-% controller periods
-g_Ts = 100;
+% controller periods (ms)
+g_Ts = 0.001;
 
 % task periods
 parameters = [g_Ts];
@@ -75,6 +75,9 @@ N_bar = rscale(A, B, C, D, K);
 mdl = 'lqr_period_with_r_and_d_simulink';
 open_system(mdl);
 
+if (exist('log.txt', 'file') == 2)
+    delete('log.txt');
+end
 
 diary('log.txt');
 diary on;
