@@ -19,8 +19,8 @@ mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
 cd('..')
 
 %% Simulation parameters
-% controller periods
-g_Ts = 100;
+% controller periods (ms)
+g_Ts = 0.001;
 
 % task periods
 parameters = [g_Ts];

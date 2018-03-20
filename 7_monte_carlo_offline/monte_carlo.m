@@ -14,8 +14,9 @@ diary on;
 
 %% configurations
 % define simulation parameters
-conf.simu_count = 3;
+conf.simu_count = 1000;
 conf.simu_time_max = 1.0;
+
 conf.period_min = 0.050;
 conf.period_max = 0.100;
 conf.period_step = 0.005;
@@ -30,8 +31,8 @@ plant.model = tf([10],[tau 1]);
 plant.model_ss = ss(A,B,C,D);
 
 % define LQR controller model
-Q = 10;
-R = 1;
+Q = 1;
+R = 0.01;
 N = 0;
 [K,S,E] = lqr(A, B, Q, R, N);
 %N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
@@ -81,7 +82,7 @@ simu.r = task.runtime.period * rand(1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-simu.r = 0;
+%simu.r = 0;
 
 while (g_time < conf.simu_time_max)
 % s1: released
@@ -143,7 +144,11 @@ simu.state = 4;
 
 % analysis cost
 t_b = [0;diff(simu.t)];
-fprintf('%f \r', sum((simu.y - 1) .^ 2 .* t_b));
+mc_j_cost = sum((simu.y - 1) .^ 2 .* t_b);
+
+% analysis steady-state time
+mc_tss = compute_steady_state_time(simu.y, simu.t, 1, 0.05);
+fprintf('0, %f, %f\r', mc_tss, mc_j_cost);
 
 % analysis and save result
 % save()

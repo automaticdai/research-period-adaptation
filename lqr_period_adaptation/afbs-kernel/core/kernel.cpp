@@ -200,7 +200,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
     /* record periods */
     for (int i = 0; i < ssGetOutputPortWidth(S, 2); i++) {
-        s_periods[i] = afbs_get_task_period(i);
+        s_periods[i] = afbs_get_task_period(i) * KERNEL_TICK_TIME;
     }
 
 
