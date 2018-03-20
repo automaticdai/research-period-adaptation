@@ -75,10 +75,17 @@ N_bar = rscale(A, B, C, D, K);
 mdl = 'lqr_period_with_r_and_d_simulink';
 open_system(mdl);
 
+% record in diary
+if (exist('log.txt', 'file') == 2)
+    delete('log.txt');
+end
 
 diary('log.txt');
 diary on;
+
+% start simulation
 sim(mdl);
+
 diary off;
 
 %filename = sprintf('Ts_%d.mat', g_Ts);
