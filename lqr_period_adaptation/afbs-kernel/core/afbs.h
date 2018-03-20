@@ -9,7 +9,7 @@
 #include "task.h"
 
 /* Scheduler Kernel Variables */
-#define KERNEL_TICK_TIME     (0.001000)                 // 1us by default
+#define KERNEL_TICK_TIME     (0.000100)                 // 1us by default
 #define TASK_MAX_NUM         (7)
 #define IDLE_TASK_IDX        (TASK_MAX_NUM)
 #define AFBS_PERIOD          (0.010)

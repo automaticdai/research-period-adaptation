@@ -11,6 +11,7 @@ addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
 global g_Ts;
+%g_Ts = 0.100;
 
 %% Compile the Kernel
 cd('afbs-kernel')
@@ -19,14 +20,11 @@ mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
 cd('..')
 
 %% Simulation parameters
-% controller periods (ms)
-g_Ts = 0.001;
-
 % task periods
 parameters = [g_Ts];
 
-simu.time = 1000.0;
-simu.samlping_time = 0.001;
+simu.time = 100.0;
+simu.samlping_time = 0.000100;
 
 opt.noise_level = 0.01;
 opt.disturbance_on = 0;
@@ -41,14 +39,14 @@ plant = tf([10],[tau 1]);
 % references
 t = [0:simu.samlping_time:simu.time]';
 
-rng(1);ref_sequence = randi(6, 1, 50);
-ref_sampling_time = 1.9;
-sim('reference_generator');
+rng(1);ref_sequence = randi(5, 1, 50);
+ref_sampling_time = 1.4567;
 
-ref = ref.data;
-ref_input.time = t;
-ref_input.signals.values = [ref];
-ref_input.signals.dimensions = 1;
+%sim('reference_generator');
+%ref = ref.data;
+%ref_input.time = t;
+%ref_input.signals.values = [ref];
+%ref_input.signals.dimensions = 1;
 
 % noises
 noise = opt.noise_level .* randn(numel(t), 1);
@@ -62,6 +60,7 @@ d.data = opt.disturbance_on .* d.data;
 d_input.time = t;
 d_input.signals.values = [d.data];
 d_input.signals.dimensions = 1;
+
 
 %% Controller Parameters
 Q = 1;

@@ -8,18 +8,22 @@ clear; clc;
 if (exist('log.txt', 'file') == 2)
     delete('log.txt');
 end
- 
+
 diary('log.txt');
 diary on;
 
+%% variables for saving results
+mc_j_cost_aa = [];
+mc_j_cost_a = [];
+
 %% configurations
 % define simulation parameters
-conf.simu_count = 1000;
+conf.simu_count = 100;
 conf.simu_time_max = 1.0;
 
-conf.period_min = 0.050;
-conf.period_max = 0.100;
-conf.period_step = 0.005;
+conf.period_min = 0.030;
+conf.period_max = 0.060;
+conf.period_step = 0.003;
 
 % define system dynamic model in state space
 %   for first order system:
@@ -52,15 +56,16 @@ task.list = 0;
 task.runtime.bcrt = 0.000;
 task.runtime.wcrt = 0.000;
 
-simu.count = 0;
 
 %% start simulation
+task.runtime.period = conf.period_min;
+while (task.runtime.period < conf.period_max)
+simu.count = 0;
+
+%% a simulation group with the same period
 while (simu.count < conf.simu_count)
 
 simu.count = simu.count + 1;
-
-% simulation outer loop
-task.runtime.period = 0.100;
 
 % simulation parameters
 simu.ref = 1;
@@ -79,10 +84,6 @@ simu.state = 0;
 % s0 -> s1
 % task start delay due to task phasing/synchronization
 simu.r = task.runtime.period * rand(1);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%simu.r = 0;
 
 while (g_time < conf.simu_time_max)
 % s1: released
@@ -148,10 +149,17 @@ mc_j_cost = sum((simu.y - 1) .^ 2 .* t_b);
 
 % analysis steady-state time
 mc_tss = compute_steady_state_time(simu.y, simu.t, 1, 0.05);
-fprintf('0, %f, %f\r', mc_tss, mc_j_cost);
+fprintf('%f, %f, %f\r', task.runtime.period, mc_tss, mc_j_cost);
 
 % analysis and save result
+mc_j_cost_a = [mc_j_cost_a;mc_j_cost];
 % save()
+end
+
+% increase period
+task.runtime.period = task.runtime.period + conf.period_step;
+mc_j_cost_aa = [mc_j_cost_aa, mc_j_cost_a];
+mc_j_cost_a = [];
 end
 
 diary off;

@@ -51,10 +51,12 @@ void task_init(void) {
 /*-- control tasks -----------------------------------------------------------*/
 double ref;
 double y;
+long task1_start_cnt;
+
 void task_1_start_hook(void) {
     ref = afbs_state_ref_load(0);
     y = afbs_state_in_load(0);
-    
+
     double N = 0.1005;
     double K = 0.0499;
     double C = 100;
@@ -62,7 +64,9 @@ void task_1_start_hook(void) {
     double x = y / C;
     double u = -1 * K * x + N * ref;
     afbs_state_out_set(0, u);
-    
+
+    task1_start_cnt = afbs_get_kernel_cnt();
+
     return;
 }
 
@@ -75,9 +79,11 @@ void task_1_finish_hook(void) {
     double x = y / C;
     double u = -1 * K * x + N * ref;
     afbs_state_out_set(0, u);
-    
+
      */
-   return;
+     //mexPrintf("%ld \r", afbs_get_kernel_cnt() - task1_start_cnt);
+
+     return;
 }
 
 

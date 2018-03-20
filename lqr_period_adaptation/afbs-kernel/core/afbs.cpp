@@ -257,7 +257,7 @@ void afbs_run(void) {
         afbs_idle();
         kernel_cnt++;
     }
-    
+
     /* run monitor */
     afbs_monitor();
 }
@@ -277,7 +277,7 @@ double ref_last = 0;
 double ref_this = 0;
 double ref_diff = 0; // difference between references, used to normalize PI
 
-#define TRACE_BUFFER_SIZE   (5000)
+#define TRACE_BUFFER_SIZE   (50000)
 int    y_idx = 0;
 double y_trace[TRACE_BUFFER_SIZE];
 
@@ -291,9 +291,10 @@ double tss_target = 0.28;
 double cost = 0;
 
 double analysis_steady_state_time(void) {
+    int i = 0;
     int tss_idx = 0;
 
-    for (int i = 0; i < y_idx; i++) {
+    for (i = 0; i < y_idx; i++) {
         // 0.2 is steady-state error
         if ((y_trace[i] > ref_last + 0.05) || (y_trace[i] < ref_last - 0.05)) {
             tss_idx = i;
@@ -301,11 +302,16 @@ double analysis_steady_state_time(void) {
     }
 
     cost = 0;
-    for (int i = 0; i < tss_idx; i++) { 
-        cost += (y_trace[i] - ref_last) / abs(ref_diff) 
-             * (y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
-    }
 
+    if (ref_diff == 0) {
+        /* first operation, no ref_diff */
+        ;
+    } else {
+        for (i = 0; i < tss_idx; i++) {
+            cost += (y_trace[i] - ref_last) / abs(ref_diff)
+                 * (y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
+        }
+    }
     return double(tss_idx) * KERNEL_TICK_TIME;
 }
 
@@ -313,7 +319,7 @@ double analysis_steady_state_time(void) {
 void afbs_monitor(void) {
     // evaluate system performance
     y_trace[y_idx] = afbs_state_in_load(0);
-    
+
     if (y_idx < TRACE_BUFFER_SIZE - 1) {
         y_idx += 1;
     } else {
