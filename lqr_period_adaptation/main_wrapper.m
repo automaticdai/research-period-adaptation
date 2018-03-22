@@ -1,8 +1,9 @@
 global g_Ts
 
 j_cost_a = [];
+tss_a = [];
 
-for g_Ts = 0.030:0.003:0.060
+for g_Ts = 0.030:0.003:0.057
     disp(g_Ts)
     
     %% run simulation
@@ -18,5 +19,6 @@ for g_Ts = 0.030:0.003:0.060
     tss = A.data(2:end, 2);
     j_cost = A.data(2:end, 3);
     
+    tss_a = [tss_a, tss];
     j_cost_a = [j_cost_a, j_cost];
 end

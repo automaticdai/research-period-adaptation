@@ -23,10 +23,10 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 100.0;
+simu.time = 200.0;
 simu.samlping_time = 0.000100;
 
-opt.noise_level = 0.01;
+opt.noise_level = 0;
 opt.disturbance_on = 0;
 
 %% System dynamic model
@@ -39,7 +39,7 @@ plant = tf([10],[tau 1]);
 % references
 t = [0:simu.samlping_time:simu.time]';
 
-rng(1);ref_sequence = randi(5, 1, 50);
+rng(1);ref_sequence = randi(10, 1, 100) * 0.5;
 ref_sampling_time = 1.4567;
 
 %sim('reference_generator');

@@ -14,7 +14,11 @@ diary on;
 
 %% variables for saving results
 mc_j_cost_aa = [];
-mc_j_cost_a = [];
+mc_j_cost_temp = [];
+
+mc_tss_aa = [];
+mc_tss_temp = [];
+
 
 %% configurations
 % define simulation parameters
@@ -22,7 +26,7 @@ conf.simu_count = 100;
 conf.simu_time_max = 1.0;
 
 conf.period_min = 0.030;
-conf.period_max = 0.060;
+conf.period_max = 0.030;
 conf.period_step = 0.003;
 
 % define system dynamic model in state space
@@ -59,7 +63,7 @@ task.runtime.wcrt = 0.000;
 
 %% start simulation
 task.runtime.period = conf.period_min;
-while (task.runtime.period < conf.period_max)
+while (task.runtime.period <= conf.period_max)
 simu.count = 0;
 
 %% a simulation group with the same period
@@ -152,14 +156,18 @@ mc_tss = compute_steady_state_time(simu.y, simu.t, 1, 0.05);
 fprintf('%f, %f, %f\r', task.runtime.period, mc_tss, mc_j_cost);
 
 % analysis and save result
-mc_j_cost_a = [mc_j_cost_a;mc_j_cost];
+mc_j_cost_temp = [mc_j_cost_temp;mc_j_cost];
+mc_tss_temp = [mc_tss_temp; mc_tss];
 % save()
 end
 
 % increase period
 task.runtime.period = task.runtime.period + conf.period_step;
-mc_j_cost_aa = [mc_j_cost_aa, mc_j_cost_a];
-mc_j_cost_a = [];
+mc_j_cost_aa = [mc_j_cost_aa, mc_j_cost_temp];
+mc_j_cost_temp = [];
+
+mc_tss_aa = [mc_tss_aa, mc_tss_temp];
+mc_tss_temp = [];
 end
 
 diary off;
