@@ -1,9 +1,17 @@
+% -------------------------------------
+% monte_carlo_lsim.m
+% Xiaotian Dai
+% University of York
+% -------------------------------------
+
+%% Configurations
 % define task model
 sys = zpk([],[-10+10j -10-10j],100);
 plant.model_ss = ss(sys);
 plant.order = order(sys);
+plant.noise_level = -1000;
 
-% define 
+% design LQR controller
 A = plant.model_ss.a;
 B = plant.model_ss.b;
 C = plant.model_ss.c;
@@ -23,111 +31,141 @@ ctrl.N_bar = N_bar;
 ctrl.x = zeros(plant.order, 1);
 ctrl.u = 0;
 ctrl.y = 0;
-ctrl.ref = 1;
+ctrl.ref = 0;
 
 % define task model
-task.bcrt = 0.001;
-task.wcrt = 0.005;
+task.T = 0.010; % 10ms - 30ms
+task.C = 0.001;
 task.list = 0;
-task.period = 0.010; % 10ms - 30ms
+
+
+task.runtime.bcrt = 0.001;
+task.runtime.wcrt = 0.005;
+
 
 % Define simulation parameter
-conf.simu_count = 1;
-conf.simu_time_max = 1.0;
+conf.simu_times = 1;
+conf.simu_time_min = 1.0;
 conf.simu_samplingtime = 0.001;
 
-% Simulation variables containers
-simu.count = 0;
-simu.y = [0];
-simu.x = zeros(1, plant.order);
-simu.u = [0];
-simu.t = [0];
+
+%% Simulation outer loop
+
+% Simulation variables
+simu.count = 0;     % simulation count
+
+while simu.count < conf.simu_times
+
+simu.count = simu.count + 1;    
+
+simu.tr = 0;        % release time
+simu.ts = 0;        % sampling delay
+simu.tf = 0;        % finish time (from sampling to finish)
 
 % initial conditions
 g_time = 0;
+simu.state = 0;     % simulation state
 
-if plant.order == 1
-    x0 = [0];
-elseif plant.order == 2
-    x0 = [0;0];
-else
-    %pass
+x0 = 1 * ones(plant.order, 1);
+
+simu.x = x0';
+simu.y = C * x0;
+simu.u = [0];
+simu.t = [0];
+simu.ut = [0];
+
+
+% Simulation inner loop
+i = 0;
+
+% control maximum simulation length
+while i < 1000
+    
+switch simu.state
+    case 0
+        % s0: task start
+        g_time = 0;
+        
+        % s0 -> s1: first job release delay
+        simu.tr = 0;
+        g_time = g_time + simu.tr;
+        simu.state = 1;
+        
+    case 1
+        % s1: task released
+        % 
+        
+        % s1 -> s2: sampling delay
+        % sampling delay is ignored
+        simu.ts = 0;
+        g_time = g_time + simu.ts;
+        simu.state = 2;
+    
+    case 2
+        % s2: task activated, sampling input
+        ctrl.x = simu.x(end, 1:plant.order)';
+        
+        % s2 -> s3: task executing
+        simu.tf = task.runtime.bcrt + (task.runtime.wcrt - task.runtime.bcrt) .* rand(1);
+        
+        t = 0:conf.simu_samplingtime:simu.tf;
+        u = ones(numel(t), 1) * ctrl.u  + wgn(numel(t), 1, plant.noise_level);
+        x0 = simu.x(end, 1:plant.order)';
+        
+        if numel(t) > 1
+            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+
+            % save result to simulation container
+            simu.x = [simu.x;x];
+            simu.y = [simu.y;y];
+            simu.u = [simu.u;u];
+            simu.t = [simu.t;t + g_time];
+        end
+        
+        simu.state = 3;
+        g_time = g_time + simu.tf;
+        
+    case 3
+        simu.tr = task.T - simu.tf;
+        
+        % s3: output & task finished
+        ctrl.u = -1 * ctrl.K * ctrl.x + (ctrl.ref * ctrl.N_bar);
+ 
+        % s3 -> s1
+        t = 0:conf.simu_samplingtime:simu.tr;
+        u = ones(numel(t), 1) * ctrl.u + wgn(numel(t), 1, plant.noise_level);
+        x0 = simu.x(end, 1:plant.order)';
+
+        if numel(t) > 1
+            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+
+            % save result to simulation container
+            simu.x = [simu.x;x];
+            simu.y = [simu.y;y];
+            simu.u = [simu.u;u];
+            simu.t = [simu.t;t + g_time];
+        end
+        
+        % be ready for the next release
+        g_time = g_time + simu.tr;
+        simu.state = 1;
+        
+        if (g_time > conf.simu_time_min)
+            break
+        end
+    
+    otherwise
+        disp('Error: unknown state!');
+
 end
 
-% run simulation
-% s0: task start
-g_time = 0;
-simu.state = 0;
+%fprintf('%f, state %d \r', g_time, simu.state)
+i = i + 1;
 
-% s0 -> s1: first job release delay
-simu.r = 0;
-
-while g_time <= conf.simu_time_max
-    % s1: task released
-    g_time = g_time + simu.r;
-    
-    % s1 -> s2
-    % sampling delay
-    
-    % s2: sampling
-    ctrl.x = simu.x(end,:)';
-       
-    % s2 -> s3
-    % input-output latency
-    
-    % s3: control output & task finished
-    ctrl.u = -1 * ctrl.K * ctrl.x + (ctrl.ref * ctrl.N_bar);
-    
-    % s3 -> s1
-    simu.tf = task.period;
-    
-    % save result to simulation container
-    simu.x = [simu.x;x];
-    simu.y = [simu.y;y];
-    simu.u = [simu.u;u];
-    simu.t = [simu.t;t + g_time];
-    
-    % update simulation timer
-    g_time = g_time + simu.tf;
-end % end of while    
+end
 
 
-while 0 % g_time <= conf.simu_time_max        
-    % computer io latency (task completation time)
-    simu.tf = task.period;
-    
-    ctrl.x = simu.x(end,:)';
-    ctrl.u = -1 * ctrl.K * ctrl.x + (ctrl.ref * ctrl.N_bar);
-    
-    t = 0:conf.simu_samplingtime:simu.tf;
-    u = ones(numel(t), 1) * ctrl.u;
-
-    % simulate the system with lsim
-    [y, t, x] = lsim(plant.model_ss, u, t, x0);
-    
-    % update initial condition
-    if plant.order == 1
-        x0 = x(end);
-    elseif plant.order == 2
-        x0 = x(end,:);
-    else
-        % pass
-    end
-
-    % save result to simulation container
-    simu.x = [simu.x;x];
-    simu.y = [simu.y;y];
-    simu.u = [simu.u;u];
-    simu.t = [simu.t;t + g_time];
-    
-    % update simulation timer
-    g_time = g_time + simu.tf;
-    
-end % end of while
-
-compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05)
-
-%plot result (optional)
+% plot result (optional)
 subplot(3,1,1)
 stairs(simu.t, simu.y)
 title('Response')
@@ -139,3 +177,12 @@ title('States')
 subplot(3,1,3)
 stairs(simu.t, simu.u)
 title('Control Inputs')
+
+
+% analysis
+pi.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
+pi.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, [1 0;0 1], [0;0], [0]);
+fprintf('%f \r', pi.cost)
+
+
+end
