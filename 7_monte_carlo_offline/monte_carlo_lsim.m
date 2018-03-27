@@ -6,10 +6,10 @@
 
 %% Configurations
 % define task model
-sys = zpk([],[-10+10j -10-10j],100);
-plant.model_ss = ss(sys);
-plant.order = order(sys);
-plant.noise_level = -1000;
+plant.sys = zpk([],[-10+10j -10-10j],100);
+plant.model_ss = ss(plant.sys);
+plant.order = order(plant.sys);
+plant.bwcl = bandwidth(feedback(plant.sys, 1));
 
 % design LQR controller
 A = plant.model_ss.a;
@@ -34,23 +34,25 @@ ctrl.y = 0;
 ctrl.ref = 0;
 
 % define task model
-task.T = 0.010; % 10ms - 30ms
+task.T_U = 0.6 / plant.bwcl;
+task.T_L = 0.2 / plant.bwcl;
+task.T = 0.050; % 10ms - 30ms
 task.C = 0.001;
-task.list = 0;
-
+task.taskset_list = 0;
 
 task.runtime.bcrt = 0.001;
-task.runtime.wcrt = 0.005;
+task.runtime.wcrt = 0.010;
 
-
-% Define simulation parameter
+% define simulation parameter
 conf.simu_times = 1;
 conf.simu_time_min = 1.0;
-conf.simu_samplingtime = 0.001;
+conf.simu_samplingtime = 0.0001;
+
+conf.noise_level = -20;
+conf.noise_on = 1;
 
 
 %% Simulation outer loop
-
 % Simulation variables
 simu.count = 0;     % simulation count
 
@@ -66,7 +68,7 @@ simu.tf = 0;        % finish time (from sampling to finish)
 g_time = 0;
 simu.state = 0;     % simulation state
 
-x0 = 1 * ones(plant.order, 1);
+x0 = 0.2530 * ones(plant.order, 1);
 
 simu.x = x0';
 simu.y = C * x0;
@@ -109,7 +111,8 @@ switch simu.state
         simu.tf = task.runtime.bcrt + (task.runtime.wcrt - task.runtime.bcrt) .* rand(1);
         
         t = 0:conf.simu_samplingtime:simu.tf;
-        u = ones(numel(t), 1) * ctrl.u  + wgn(numel(t), 1, plant.noise_level);
+        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+        u = ones(numel(t), 1) * ctrl.u  + noises;
         x0 = simu.x(end, 1:plant.order)';
         
         if numel(t) > 1
@@ -133,7 +136,8 @@ switch simu.state
  
         % s3 -> s1
         t = 0:conf.simu_samplingtime:simu.tr;
-        u = ones(numel(t), 1) * ctrl.u + wgn(numel(t), 1, plant.noise_level);
+        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+        u = ones(numel(t), 1) * ctrl.u + noises;
         x0 = simu.x(end, 1:plant.order)';
 
         if numel(t) > 1
@@ -169,19 +173,21 @@ end
 subplot(3,1,1)
 stairs(simu.t, simu.y)
 title('Response')
+hold on;
 
 subplot(3,1,2)
 stairs(simu.t, simu.x)
 title('States')
+hold on;
 
 subplot(3,1,3)
 stairs(simu.t, simu.u)
 title('Control Inputs')
-
+hold on;
 
 % analysis
 pi.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
-pi.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, [1 0;0 1], [0;0], [0]);
+pi.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, Q, N, R);
 fprintf('%f \r', pi.cost)
 
 
