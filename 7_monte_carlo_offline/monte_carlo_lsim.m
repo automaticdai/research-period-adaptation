@@ -4,61 +4,15 @@
 % University of York
 % -------------------------------------
 
-%% Configurations
-% define task model
-plant.sys = zpk([],[-10+10j -10-10j],100);
-plant.model_ss = ss(plant.sys);
-plant.order = order(plant.sys);
-plant.bwcl = bandwidth(feedback(plant.sys, 1));
-
-% design LQR controller
-A = plant.model_ss.a;
-B = plant.model_ss.b;
-C = plant.model_ss.c;
-D = plant.model_ss.d;
-
-Q = 1 * eye(plant.order);
-R = 0.01;
-N = zeros(plant.order, 1);
-
-%[K,S,E] = lqrd(A, B, Q, R, N, 0.010);
-[K,S,E] = lqr(A, B, Q, R, N);
-N_bar = rscale(A, B, C, D, K);
-
-% define contol model
-ctrl.K = K;
-ctrl.N_bar = N_bar;
-ctrl.x = zeros(plant.order, 1);
-ctrl.u = 0;
-ctrl.y = 0;
-ctrl.ref = 0;
-
-% define task model
-task.T_U = 0.6 / plant.bwcl;
-task.T_L = 0.2 / plant.bwcl;
-task.T = 0.050; % 10ms - 30ms
-task.C = 0.001;
-task.taskset_list = 0;
-
-task.runtime.bcrt = 0.001;
-task.runtime.wcrt = 0.010;
-
-% define simulation parameter
-conf.simu_times = 1;
-conf.simu_time_min = 1.0;
-conf.simu_samplingtime = 0.0001;
-
-conf.noise_level = -20;
-conf.noise_on = 1;
-
-
 %% Simulation outer loop
 % Simulation variables
 simu.count = 0;     % simulation count
 
 while simu.count < conf.simu_times
 
-simu.count = simu.count + 1;    
+simu.count = simu.count + 1;
+
+fprintf('Ti = %f, i = %d \r', task.T, simu.count);
 
 simu.tr = 0;        % release time
 simu.ts = 0;        % sampling delay
@@ -68,7 +22,7 @@ simu.tf = 0;        % finish time (from sampling to finish)
 g_time = 0;
 simu.state = 0;     % simulation state
 
-x0 = 0.2530 * ones(plant.order, 1);
+x0 = 2.530 * ones(plant.order, 1);
 
 simu.x = x0';
 simu.y = C * x0;
@@ -76,13 +30,12 @@ simu.u = [0];
 simu.t = [0];
 simu.ut = [0];
 
-
 % Simulation inner loop
 i = 0;
 
 % control maximum simulation length
 while i < 1000
-    
+
 switch simu.state
     case 0
         % s0: task start
@@ -108,6 +61,8 @@ switch simu.state
         ctrl.x = simu.x(end, 1:plant.order)';
         
         % s2 -> s3: task executing
+        % sampling response time
+        % (uniform distribution)
         simu.tf = task.runtime.bcrt + (task.runtime.wcrt - task.runtime.bcrt) .* rand(1);
         
         t = 0:conf.simu_samplingtime:simu.tf;
@@ -170,6 +125,7 @@ end
 
 
 % plot result (optional)
+if false
 subplot(3,1,1)
 stairs(simu.t, simu.y)
 title('Response')
@@ -184,11 +140,14 @@ subplot(3,1,3)
 stairs(simu.t, simu.u)
 title('Control Inputs')
 hold on;
+end
 
 % analysis
-pi.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
-pi.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, Q, N, R);
-fprintf('%f \r', pi.cost)
+simu.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
+simu.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, Q, N, R);
 
+pi.x = [pi.x task.T];
+pi.y1 = [pi.y1 simu.cost];
+pi.y2 = [pi.y2 simu.tss];
 
 end
