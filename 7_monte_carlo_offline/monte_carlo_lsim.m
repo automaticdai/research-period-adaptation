@@ -62,8 +62,7 @@ switch simu.state
         
         % s2 -> s3: task executing
         % sampling response time
-        % (uniform distribution)
-        simu.tf = task.runtime.bcrt + (task.runtime.wcrt - task.runtime.bcrt) .* rand(1);
+        simu.tf = sampling_ri(task.runtime.bcrt, task.runtime.wcrt);
         
         t = 0:conf.simu_samplingtime:simu.tf;
         noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
