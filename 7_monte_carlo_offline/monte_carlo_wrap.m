@@ -6,6 +6,7 @@
 
 %% Configurations
 % define task model
+%tau = 5; plant.sys = tf([10],[tau 1]);
 plant.sys = zpk([],[-10+10j -10-10j],100);
 plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
@@ -31,32 +32,37 @@ ctrl.N_bar = N_bar;
 ctrl.x = zeros(plant.order, 1);
 ctrl.u = 0;
 ctrl.y = 0;
-ctrl.ref = 0;
+ctrl.ref = 1;
 
 % define task model
 task.T_U = 0.6 / plant.bwcl;
 task.T_L = 0.2 / plant.bwcl;
-task.T = 0.013; % 10ms - 30ms
+task.T = 0.000;                 % 10ms - 30ms
+
 task.C = 0.001;
 task.taskset_list = 0;
-
 task.runtime.bcrt = 0.000;
-task.runtime.wcrt = 0.002;
+task.runtime.wcrt = 0.000;
+
+assert(task.runtime.wcrt <= task.T_L)
 
 % define simulation parameter
-conf.simu_times = 100;
+conf.simu_times = 1;
 conf.simu_time_min = 1.0;
 conf.simu_samplingtime = 0.0001;
 
 conf.noise_level = -20;
-conf.noise_on = 1;
+conf.noise_on = 0;
 
 pi.x = [];
 pi.y1 = [];
 pi.y2 = [];
+pi.y3 = [];
+pi.y4 = [];
+
 
 %% Run Simulation
-for period = task.T_L:0.001:task.T_U
+for period = 0.018:0.001:0.018 %task.T_L:0.001:task.T_U
     task.T = period;
     run('monte_carlo_lsim.m')
 end

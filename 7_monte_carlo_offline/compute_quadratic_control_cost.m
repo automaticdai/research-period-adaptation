@@ -2,7 +2,6 @@ function [ quad_cost ] = compute_quadratic_control_cost(x_stream, u_stream, Ts, 
 
 quad_cost = 0;
 
-
 for i = 1:numel(u_stream)
     
 x = x_stream(i,:)';

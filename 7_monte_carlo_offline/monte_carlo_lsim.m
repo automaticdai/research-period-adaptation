@@ -22,7 +22,7 @@ simu.tf = 0;        % finish time (from sampling to finish)
 g_time = 0;
 simu.state = 0;     % simulation state
 
-x0 = 2.530 * ones(plant.order, 1);
+x0 = zeros(plant.order, 1);
 
 simu.x = x0';
 simu.y = C * x0;
@@ -125,6 +125,7 @@ end
 
 % plot result (optional)
 if false
+figure()
 subplot(3,1,1)
 stairs(simu.t, simu.y)
 title('Response')
@@ -141,12 +142,22 @@ title('Control Inputs')
 hold on;
 end
 
+if true
+stairs(simu.t, simu.y)
+hold on;
+stairs(simu.t, simu.y)
+end
+
 % analysis
 simu.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
 simu.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, Q, N, R);
+simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
+simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
 
 pi.x = [pi.x task.T];
 pi.y1 = [pi.y1 simu.cost];
 pi.y2 = [pi.y2 simu.tss];
+pi.y3 = [pi.y3 simu.cost_iae];
+pi.y4 = [pi.y4 simu.cost_ise];
 
 end
