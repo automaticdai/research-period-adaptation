@@ -17,27 +17,36 @@ void Task::on_task_ready(void) {
     d_ = D_;
     r_ = T_;
     cnt_++;
+    
+    release_time_cnt = kernel_cnt;
+    
+}
+
+void Task::on_task_start(void) {
+    //mexPrintf("Task %d started \r", id_);
+    
+    start_time_cnt = kernel_cnt;
+    
+    if (onstart_hook_ != NULL) {
+        onstart_hook_();
+    }
+    
+}
+
+void Task::on_task_finish(void) {
+    //mexPrintf("Task %d finished \r", id_);
+    
+    finish_time_cnt = kernel_cnt;
+    
+    if (onfinish_hook_ != NULL) {
+        onfinish_hook_();
+    }
 }
 
 void Task::on_task_missed_deadline() {
     d_ = D_;
     r_ = T_;
     cnt_++;
-}
-
-void Task::on_task_start(void) {
-    //mexPrintf("Task %d started \r", id_);
-    if (onstart_hook_ != NULL) {
-        onstart_hook_();
-    }
-}
-
-
-void Task::on_task_finish(void) {
-    //mexPrintf("Task %d finished \r", id_);
-    if (onfinish_hook_ != NULL) {
-        onfinish_hook_();
-    }
 }
 
 void Task::set_onstart_hook(callback onstart)

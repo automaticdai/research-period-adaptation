@@ -9,7 +9,7 @@
 #include "task.h"
 
 /* Scheduler Kernel Variables */
-#define KERNEL_TICK_TIME     (0.000100)                 // 1us by default
+#define KERNEL_TICK_TIME     (0.000100)                // 100 us by default
 #define TASK_MAX_NUM         (7)
 #define IDLE_TASK_IDX        (TASK_MAX_NUM)
 #define AFBS_PERIOD          (0.010)
@@ -42,21 +42,22 @@ void afbs_run(void);
 void afbs_idle(void);
 void afbs_dump_information(void);
 
-long afbs_get_kernel_cnt(void);
-long afbs_get_idle_cnt(void);
+long   afbs_get_kernel_cnt(void);
+long   afbs_get_idle_cnt(void);
 double afbs_get_current_time(void);
 
-void afbs_state_in_set(int, double);
-void afbs_state_ref_set(int, double);
+void   afbs_state_in_set(int, double);
+void   afbs_state_ref_set(int, double);
 double afbs_state_out_load(int);
 
 double afbs_state_in_load(int);
 double afbs_state_ref_load(int);
-void afbs_state_out_set(int, double);
+void   afbs_state_out_set(int, double);
 
-void afbs_set_param(int, double);
+void   afbs_set_param(int, double);
 double afbs_get_param(int);
 
-void afbs_monitor(void);
+void   afbs_performance_monitor(void);
+long   afbs_report_task_last_response_time(int task_id);
 
 #endif

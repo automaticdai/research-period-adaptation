@@ -11,7 +11,7 @@ addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
 global g_Ts;
-%g_Ts = 0.100;
+g_Ts = 0.100;
 
 %% Compile the Kernel
 cd('afbs-kernel')
@@ -19,15 +19,17 @@ mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
        ./core/task.cpp
 cd('..')
 
+
 %% Simulation parameters
 % task periods
 parameters = [g_Ts];
 
-simu.time = 200.0;
+simu.time = 100;
 simu.samlping_time = 0.000100;
 
 opt.noise_level = 0;
 opt.disturbance_on = 0;
+
 
 %% System dynamic model
 % period should be 5% - 10% of the rising time (settling time for 1st order systems)
@@ -70,6 +72,7 @@ N = 0;
 %N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
 N_bar = rscale(A, B, C, D, K);
 
+
 %% Run Simulink model
 mdl = 'lqr_period_with_r_and_d_simulink';
 open_system(mdl);
@@ -89,6 +92,7 @@ diary off;
 
 %filename = sprintf('Ts_%d.mat', g_Ts);
 %save(filename, 'plant', 't', 'ref', 'y', 'u');
+
 
 %% output error
 %state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0, 0);

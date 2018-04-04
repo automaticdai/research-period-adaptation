@@ -259,7 +259,7 @@ void afbs_run(void) {
     }
 
     /* run monitor */
-    afbs_monitor();
+    afbs_performance_monitor();
 }
 
 void afbs_idle(void)
@@ -316,14 +316,16 @@ double analysis_steady_state_time(void) {
 }
 
 
-void afbs_monitor(void) {
+void afbs_performance_monitor(void) {
     // evaluate system performance
     y_trace[y_idx] = afbs_state_in_load(0);
 
     if (y_idx < TRACE_BUFFER_SIZE - 1) {
         y_idx += 1;
     } else {
-        mexPrintf("Error: monitor overflowed! \r");
+        #ifdef AFBS_WARNING_ON
+            mexPrintf("Error: monitor overflowed! \r");
+        #endif
     }
 
     ref_this = afbs_state_ref_load(0);
@@ -331,7 +333,7 @@ void afbs_monitor(void) {
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         tss = analysis_steady_state_time();
-        mexPrintf("%f, %f, %f \r", afbs_get_current_time(), tss, cost);
+        //mexPrintf("%f, %f, %f \r", afbs_get_current_time(), tss, cost);
 
         /* Policy 1 */
         /*
@@ -384,4 +386,8 @@ void afbs_monitor(void) {
 
 }
 
+
+long afbs_report_task_last_response_time(int task_id) {
+    return TCB[task_id].finish_time_cnt - TCB[task_id].release_time_cnt;
+}
 /*- EOF ----------------------------------------------------------------------*/

@@ -5,10 +5,15 @@ int TASK_1_PERIOD = 0; // normal
 int TASK_2_PERIOD = 0; // slowest
 int TASK_3_PERIOD = 0; // adapative
 
-int TASK_1_IDX = 0;
+int TASK_1_IDX = 5;
 
 int task_config[TASK_NUMBERS][5] = {
-{0, 1, 1, 0, 0}
+{0,   7,  12, 0, 0},
+{1,   8, 121, 0, 0},
+{2,   2, 203, 0, 0},
+{3,   2, 152, 0, 0},
+{4,   3, 202, 0, 0},
+{5,   1,   1, 0, 0},
 };
 /*
 int task_config[TASK_NUMBERS][5] = {
@@ -35,14 +40,14 @@ void task_init(void) {
     TASK_2_PERIOD = afbs_get_param(1) / KERNEL_TICK_TIME;
     TASK_3_PERIOD = afbs_get_param(2) / KERNEL_TICK_TIME;
 
-    class Task tau1(TASK_1_IDX, 1, TASK_1_PERIOD, 0, 0);
+    class Task tau1(TASK_1_IDX, 10, TASK_1_PERIOD, 0, 0);
     //class Task tau2(7, 20, TASK_2_PERIOD, 0, 0);
     //class Task tau3(8, 20, TASK_3_PERIOD, 0, 0);
     afbs_create_task(tau1, NULL, task_1_start_hook, task_1_finish_hook);
     //afbs_create_task(tau2, NULL, task_2_start_hook, task_2_finish_hook);
     //afbs_create_task(tau3, NULL, task_3_start_hook, task_3_finish_hook);
 
-    mexPrintf("t_stamp, tss, j_cost \r");
+    //mexPrintf("t_stamp, tss, j_cost \r");
 
     return;
 }
@@ -51,7 +56,6 @@ void task_init(void) {
 /*-- control tasks -----------------------------------------------------------*/
 double ref;
 double y;
-long task1_start_cnt;
 
 void task_1_start_hook(void) {
     ref = afbs_state_ref_load(0);
@@ -64,8 +68,6 @@ void task_1_start_hook(void) {
     double x = y / C;
     double u = -1 * K * x + N * ref;
     afbs_state_out_set(0, u);
-
-    task1_start_cnt = afbs_get_kernel_cnt();
 
     return;
 }
@@ -81,9 +83,10 @@ void task_1_finish_hook(void) {
     afbs_state_out_set(0, u);
 
      */
-     //mexPrintf("%ld \r", afbs_get_kernel_cnt() - task1_start_cnt);
 
-     return;
+    mexPrintf("%ld \r", afbs_report_task_last_response_time(afbs_get_running_task_id()));
+
+    return;
 }
 
 

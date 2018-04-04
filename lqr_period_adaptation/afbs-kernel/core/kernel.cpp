@@ -127,8 +127,6 @@ static void mdlInitializeSizes(SimStruct *S)
     /* create task list */
     task_init();
 
-
-
 } /* end mdlInitializeSizes */
 
 

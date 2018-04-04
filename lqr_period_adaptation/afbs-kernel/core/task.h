@@ -19,7 +19,14 @@ public:
     int d_;     // deadline countdown
     int r_;     // next release countdown
     int cnt_;   // release count
-
+    
+    int type_;  // task type: periodic, sporadic, run_once
+    
+    /* variables used for calc response time */
+    long release_time_cnt;
+    long start_time_cnt;
+    long finish_time_cnt;
+    
     enum_task_status status_;
     callback onstart_hook_;
     callback onfinish_hook_;
@@ -39,6 +46,12 @@ public:
         cnt_ = 0;
         onstart_hook_ = NULL;
         onfinish_hook_ = NULL;
+        
+        type_ = 0;
+        
+        release_time_cnt = 0;
+        start_time_cnt = 0;
+        finish_time_cnt = 0;
     }
 
     ~Task() { ; }
