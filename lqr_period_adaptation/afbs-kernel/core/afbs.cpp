@@ -333,7 +333,7 @@ void afbs_performance_monitor(void) {
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         tss = analysis_steady_state_time();
-        //mexPrintf("%f, %f, %f \r", afbs_get_current_time(), tss, cost);
+        mexPrintf("%f, %f, %f, 0 \r", afbs_get_current_time(), tss, cost);
 
         /* Policy 1 */
         /*

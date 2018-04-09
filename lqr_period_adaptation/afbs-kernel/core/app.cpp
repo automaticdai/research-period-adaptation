@@ -84,11 +84,10 @@ void task_1_finish_hook(void) {
 
      */
 
-    mexPrintf("%ld \r", afbs_report_task_last_response_time(afbs_get_running_task_id()));
+    mexPrintf("%f, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
 
     return;
 }
-
 
 void task_2_start_hook(void) {
     return;
@@ -97,7 +96,6 @@ void task_2_start_hook(void) {
 void task_2_finish_hook(void) {
     return;
 }
-
 
 void task_3_start_hook(void) {
     return;
