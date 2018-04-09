@@ -1,20 +1,23 @@
 % Response Time Analysis for Fixed Priority Scheduling
-% input: taskset array, task of interest, format [Pi, Ti, Ci, Di, 0, 0]
-% output: [..., BCRT, WCRT]
-function taskset_n = rta(taskset)
-       
+% input: taskset array, task of interest, format [Pi, Ti, Ci, Di]
+% output: [BCRT, WCRT]
+function [bcrt wcrt] = rta(taskset)
+
 p_idx = 1;
 t_idx = 2;
 c_idx = 3;
 d_idx = 4;
-br_idx = 5;
-wr_idx = 6;
 
-for i = 1:size(taskset,1)
+task_numbers = size(taskset,1);
+
+bcrt = zeros(task_numbers, 1);
+wcrt = zeros(task_numbers, 1);
+
+for i = 1:task_numbers
     task = taskset(i, :);
-    
+
     % solving best-case response time
-    taskset(i, br_idx) = taskset(i, c_idx);
+    bcrt(i) = taskset(i, c_idx);
     
     % solving worst-case response time
     omega = task(c_idx);
@@ -32,7 +35,7 @@ for i = 1:size(taskset,1)
 
         if (abs(omega_n - omega) < 1e-5)
             % finish searching
-            taskset(i, wr_idx) = omega;
+            wcrt(i) = omega;
             break;
         else
             % continue
@@ -41,13 +44,11 @@ for i = 1:size(taskset,1)
             cnt = cnt + 1;
             if (cnt > 1000)
                 disp(['Error: Task ', num2str(i), ' is starving!'])
-                taskset(i, wr_idx) = inf;
+                wcrt(i) = inf;
                 break;
             end
         end
     end
 end
-
-taskset_n = taskset;
 
 end
