@@ -24,7 +24,7 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 100;
+simu.time = 1000;
 simu.samlping_time = 0.000100;
 
 opt.noise_level = 0;

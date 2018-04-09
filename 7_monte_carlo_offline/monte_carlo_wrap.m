@@ -40,11 +40,13 @@ task.T_L = 0.2 / plant.bwcl;
 task.T = 0.000;                 % 10ms - 30ms
 
 task.C = 0.001;
-task.taskset_list = 0;
-task.runtime.bcrt = 0.000;
-task.runtime.wcrt = 0.000;
+
+% RTA to get BCRT and WCRT
+task.runtime.bcrt = 0.001;
+task.runtime.wcrt = 0.005;
 
 assert(task.runtime.wcrt <= task.T_L)
+
 
 % define simulation parameter
 conf.simu_times = 1;
