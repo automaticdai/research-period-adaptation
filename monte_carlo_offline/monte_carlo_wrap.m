@@ -4,6 +4,9 @@
 % University of York
 % -------------------------------------
 
+% for reproducibility
+rng default
+
 %% Configurations
 % define task model
 %tau = 5; plant.sys = tf([10],[tau 1]);
@@ -42,29 +45,31 @@ task.T = 0.000;                 % 10ms - 30ms
 task.C = 0.001;
 
 % RTA to get BCRT and WCRT
-task.runtime.bcrt = 0.001;
-task.runtime.wcrt = 0.005;
+task.runtime.bcrt = 0.002;
+task.runtime.wcrt = 0.006;
+task.runtime.ri = ri;
 
 assert(task.runtime.wcrt <= task.T_L)
 
-
 % define simulation parameter
-conf.simu_times = 1;
+conf.simu_times = 3000;
 conf.simu_time_min = 1.0;
 conf.simu_samplingtime = 0.0001;
 
-conf.noise_level = -20;
 conf.noise_on = 0;
+conf.noise_level = -20;
 
-pi.x = [];
-pi.y1 = [];
-pi.y2 = [];
-pi.y3 = [];
-pi.y4 = [];
+conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
 
+% performance indices
+pi.T = [];
+pi.Tss = [];
+pi.J = [];
+pi.IAE = [];
+pi.ISE = [];
 
 %% Run Simulation
-for period = 0.018:0.001:0.018 %task.T_L:0.001:task.T_U
+for period = 0.020:0.001:0.020 %task.T_L:0.001:task.T_U
     task.T = period;
     run('monte_carlo_lsim.m')
 end

@@ -62,7 +62,17 @@ switch simu.state
         
         % s2 -> s3: task executing
         % sampling response time
-        simu.tf = sampling_ri(task.runtime.bcrt, task.runtime.wcrt);
+        switch (conf.sampling_method)
+            case 1
+                simu.tf = sampling_ri_uniform(task.runtime.bcrt, task.runtime.wcrt);
+            case 2
+                simu.tf = sampling_ri_norm(task.runtime.bcrt, task.runtime.wcrt);
+            case 3
+                simu.tf = sampling_ri_empirical(task.runtime.ri);
+        end
+        
+        %;
+        %;
         
         t = 0:conf.simu_samplingtime:simu.tf;
         noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
@@ -154,10 +164,10 @@ simu.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtim
 simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
 simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
 
-pi.x = [pi.x task.T];
-pi.y1 = [pi.y1 simu.cost];
-pi.y2 = [pi.y2 simu.tss];
-pi.y3 = [pi.y3 simu.cost_iae];
-pi.y4 = [pi.y4 simu.cost_ise];
+pi.T   = [pi.T task.T];
+pi.Tss = [pi.Tss simu.tss];
+pi.J   = [pi.J simu.cost];
+pi.IAE = [pi.IAE simu.cost_iae];
+pi.ISE = [pi.ISE simu.cost_ise];
 
 end

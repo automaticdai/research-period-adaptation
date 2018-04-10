@@ -1,7 +1,5 @@
-function [ri] = sampling_from_distribution(BCRT, WCRT)
-
-% uniform distribution
-%ri = BCRT + (WCRT - BCRT) .* rand(1);
+% sampling response time with normal distribution
+function [ri] = sampling_ri_norm(BCRT, WCRT)
 
 % normal distribution
 ri = normrnd((WCRT - BCRT) / 2, (WCRT - BCRT) / 3.5);
