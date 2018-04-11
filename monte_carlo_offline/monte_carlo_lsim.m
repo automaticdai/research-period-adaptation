@@ -42,7 +42,23 @@ switch simu.state
         g_time = 0;
         
         % s0 -> s1: first job release delay
-        simu.tr = 0;
+        simu.tr = task.T * rand(1);
+        
+        t = 0:conf.simu_samplingtime:simu.tr;
+        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+        u = ones(numel(t), 1) * ctrl.u + noises;
+        x0 = simu.x(end, 1:plant.order)';
+
+        if numel(t) > 1
+            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+
+            % save result to simulation container
+            simu.x = [simu.x;x];
+            simu.y = [simu.y;y];
+            simu.u = [simu.u;u];
+            simu.t = [simu.t;t + g_time];
+        end
+        
         g_time = g_time + simu.tr;
         simu.state = 1;
         

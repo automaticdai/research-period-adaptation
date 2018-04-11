@@ -22,7 +22,7 @@ C = plant.model_ss.c;
 D = plant.model_ss.d;
 
 Q = 1 * eye(plant.order);
-R = 0.01;
+R = 0.1;
 N = zeros(plant.order, 1);
 
 %[K,S,E] = lqrd(A, B, Q, R, N, 0.010);
@@ -42,10 +42,10 @@ task.T_U = 0.6 / plant.bwcl;
 task.T_L = 0.2 / plant.bwcl;
 task.T = 0.000;                 % 10ms - 30ms
 
-task.C = 0.001;
-
 % RTA to get BCRT and WCRT
-task.runtime.bcrt = 0.002;
+run('rta_test.m')
+
+task.runtime.bcrt = 0.001;
 task.runtime.wcrt = 0.006;
 task.runtime.ri = ri;
 
@@ -59,7 +59,7 @@ conf.simu_samplingtime = 0.0001;
 conf.noise_on = 0;
 conf.noise_level = -20;
 
-conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
+conf.sampling_method = 3; % 1: uniform, 2: norm, 3: empirical
 
 % performance indices
 pi.T = [];
