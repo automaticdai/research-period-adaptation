@@ -4,8 +4,8 @@
 function [bcrt wcrt] = rta(taskset)
 
 p_idx = 1;
-t_idx = 2;
-c_idx = 3;
+c_idx = 2;
+t_idx = 3;
 d_idx = 4;
 
 task_numbers = size(taskset,1);
