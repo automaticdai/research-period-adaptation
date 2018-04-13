@@ -277,7 +277,7 @@ double ref_last = 0;
 double ref_this = 0;
 double ref_diff = 0; // difference between references, used to normalize PI
 
-#define TRACE_BUFFER_SIZE   (50000)
+#define TRACE_BUFFER_SIZE   (1000000L)
 int    y_idx = 0;
 double y_trace[TRACE_BUFFER_SIZE];
 
