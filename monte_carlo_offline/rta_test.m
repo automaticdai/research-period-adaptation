@@ -1,8 +1,12 @@
-taskset = [0 7 12 0;
-        1  8 121  121;
-        2  2 203  203;
-        3  2 152  152;
-        4  3 202  202;
-        5 10 200  200];
+taskset = [0  70  120     0;
+           1  80 1210  1210;
+           2  20 2030  2030;
+           3  20 1520  1520;
+           4  30 2020  2020;
+           5 100 2000  2000];
 
-[bcrt wcrt] = rta(taskset);
+kernel_time = 10 * 10^-6;
+[bcrt, wcrt] = rta(taskset);
+
+bcrt_a = bcrt .* kernel_time;
+wcrt_a = wcrt .* kernel_time;

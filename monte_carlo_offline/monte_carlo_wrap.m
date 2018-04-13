@@ -45,21 +45,25 @@ task.T = 0.000;                 % 10ms - 30ms
 % RTA to get BCRT and WCRT
 run('rta_test.m')
 
-task.runtime.bcrt = 0.001;
-task.runtime.wcrt = 0.006;
-task.runtime.ri = ri;
+task.runtime.bcrt = bcrt_a(end);
+task.runtime.wcrt = wcrt_a(end);
 
 assert(task.runtime.wcrt <= task.T_L)
 
 % define simulation parameter
-conf.simu_times = 3000;
+conf.simu_times = 1000;
 conf.simu_time_min = 1.0;
-conf.simu_samplingtime = 0.0001;
+conf.simu_samplingtime = 0.000100;
 
 conf.noise_on = 0;
 conf.noise_level = -20;
 
-conf.sampling_method = 3; % 1: uniform, 2: norm, 3: empirical
+conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
+
+if (conf.sampling_method == 3)
+    % load Ri distribution
+    task.runtime.ri = ri;
+end
 
 % performance indices
 pi.T = [];
@@ -69,7 +73,7 @@ pi.IAE = [];
 pi.ISE = [];
 
 %% Run Simulation
-for period = 0.020:0.001:0.020 %task.T_L:0.001:task.T_U
+for period = 0.010:0.001:0.010 %task.T_L:0.001:task.T_U
     task.T = period;
     run('monte_carlo_lsim.m')
 end

@@ -35,143 +35,141 @@ i = 0;
 
 % control maximum simulation length
 while i < 1000
+    switch simu.state
+        case 0
+            % s0: task start
+            g_time = 0;
 
-switch simu.state
-    case 0
-        % s0: task start
-        g_time = 0;
-        
-        % s0 -> s1: first job release delay
-        simu.tr = task.T * rand(1);
-        
-        t = 0:conf.simu_samplingtime:simu.tr;
-        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
-        u = ones(numel(t), 1) * ctrl.u + noises;
-        x0 = simu.x(end, 1:plant.order)';
+            % s0 -> s1: first job release delay
+            %simu.tr = 0;
+            simu.tr = task.T * rand(1);
 
-        if numel(t) > 1
-            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+            t = 0:conf.simu_samplingtime:simu.tr;
+            noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+            u = ones(numel(t), 1) * ctrl.u + noises;
+            x0 = simu.x(end, 1:plant.order)';
 
-            % save result to simulation container
-            simu.x = [simu.x;x];
-            simu.y = [simu.y;y];
-            simu.u = [simu.u;u];
-            simu.t = [simu.t;t + g_time];
-        end
-        
-        g_time = g_time + simu.tr;
-        simu.state = 1;
-        
-    case 1
-        % s1: task released
-        % 
-        
-        % s1 -> s2: sampling delay
-        % sampling delay is ignored
-        simu.ts = 0;
-        g_time = g_time + simu.ts;
-        simu.state = 2;
-    
-    case 2
-        % s2: task activated, sampling input
-        ctrl.x = simu.x(end, 1:plant.order)';
-        
-        % s2 -> s3: task executing
-        % sampling response time
-        switch (conf.sampling_method)
-            case 1
-                simu.tf = sampling_ri_uniform(task.runtime.bcrt, task.runtime.wcrt);
-            case 2
-                simu.tf = sampling_ri_norm(task.runtime.bcrt, task.runtime.wcrt);
-            case 3
-                simu.tf = sampling_ri_empirical(task.runtime.ri);
-        end
-        
-        %;
-        %;
-        
-        t = 0:conf.simu_samplingtime:simu.tf;
-        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
-        u = ones(numel(t), 1) * ctrl.u  + noises;
-        x0 = simu.x(end, 1:plant.order)';
-        
-        if numel(t) > 1
-            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+            if numel(t) > 1
+                [y, t, x] = lsim(plant.model_ss, u, t, x0);
 
-            % save result to simulation container
-            simu.x = [simu.x;x];
-            simu.y = [simu.y;y];
-            simu.u = [simu.u;u];
-            simu.t = [simu.t;t + g_time];
-        end
-        
-        simu.state = 3;
-        g_time = g_time + simu.tf;
-        
-    case 3
-        simu.tr = task.T - simu.tf;
-        
-        % s3: output & task finished
-        ctrl.u = -1 * ctrl.K * ctrl.x + (ctrl.ref * ctrl.N_bar);
- 
-        % s3 -> s1
-        t = 0:conf.simu_samplingtime:simu.tr;
-        noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
-        u = ones(numel(t), 1) * ctrl.u + noises;
-        x0 = simu.x(end, 1:plant.order)';
+                % save result to simulation container
+                simu.x = [simu.x;x];
+                simu.y = [simu.y;y];
+                simu.u = [simu.u;u];
+                simu.t = [simu.t;t + g_time];
+            end
 
-        if numel(t) > 1
-            [y, t, x] = lsim(plant.model_ss, u, t, x0);
+            g_time = g_time + simu.tr;
+            simu.state = 1;
 
-            % save result to simulation container
-            simu.x = [simu.x;x];
-            simu.y = [simu.y;y];
-            simu.u = [simu.u;u];
-            simu.t = [simu.t;t + g_time];
-        end
-        
-        % be ready for the next release
-        g_time = g_time + simu.tr;
-        simu.state = 1;
-        
-        if (g_time > conf.simu_time_min)
-            break
-        end
-    
-    otherwise
-        disp('Error: unknown state!');
+        case 1
+            % s1: task released
+            % 
 
-end
+            % s1 -> s2: sampling delay
+            % sampling delay is ignored
+            simu.ts = 0;
+            g_time = g_time + simu.ts;
+            simu.state = 2;
 
-%fprintf('%f, state %d \r', g_time, simu.state)
-i = i + 1;
+        case 2
+            % s2: task activated, sampling input
+            ctrl.x = simu.x(end, 1:plant.order)';
 
+            % s2 -> s3: task executing
+            % sampling response time
+            switch (conf.sampling_method)
+                case 1
+                    simu.tf = sampling_ri_uniform(task.runtime.bcrt, task.runtime.wcrt);
+                case 2
+                    simu.tf = sampling_ri_norm(task.runtime.bcrt, task.runtime.wcrt);
+                case 3
+                    simu.tf = sampling_ri_empirical(task.runtime.ri);
+            end
+
+            %;
+            %;
+
+            t = 0:conf.simu_samplingtime:simu.tf;
+            noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+            u = ones(numel(t), 1) * ctrl.u  + noises;
+            x0 = simu.x(end, 1:plant.order)';
+
+            if numel(t) > 1
+                [y, t, x] = lsim(plant.model_ss, u, t, x0);
+
+                % save result to simulation container
+                simu.x = [simu.x;x];
+                simu.y = [simu.y;y];
+                simu.u = [simu.u;u];
+                simu.t = [simu.t;t + g_time];
+            end
+
+            simu.state = 3;
+            g_time = g_time + simu.tf;
+
+        case 3
+            simu.tr = task.T - simu.tf;
+
+            % s3: output & task finished
+            ctrl.u = -1 * ctrl.K * ctrl.x + (ctrl.ref * ctrl.N_bar);
+
+            % s3 -> s1
+            t = 0:conf.simu_samplingtime:simu.tr;
+            noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
+            u = ones(numel(t), 1) * ctrl.u + noises;
+            x0 = simu.x(end, 1:plant.order)';
+
+            if numel(t) > 1
+                [y, t, x] = lsim(plant.model_ss, u, t, x0);
+
+                % save result to simulation container
+                simu.x = [simu.x;x];
+                simu.y = [simu.y;y];
+                simu.u = [simu.u;u];
+                simu.t = [simu.t;t + g_time];
+            end
+
+            % be ready for the next release
+            g_time = g_time + simu.tr;
+            simu.state = 1;
+
+            if (g_time > conf.simu_time_min)
+                break
+            end
+
+        otherwise
+            disp('Error: unknown state!');
+    end
+
+    %fprintf('%f, state %d \r', g_time, simu.state)
+    i = i + 1;
 end
 
 
 % plot result (optional)
 if false
-figure()
-subplot(3,1,1)
-stairs(simu.t, simu.y)
-title('Response')
-hold on;
+    figure()
+    subplot(3,1,1)
+    stairs(simu.t, simu.y)
+    title('Response')
+    hold on;
 
-subplot(3,1,2)
-stairs(simu.t, simu.x)
-title('States')
-hold on;
+    subplot(3,1,2)
+    stairs(simu.t, simu.x)
+    title('States')
+    hold on;
 
-subplot(3,1,3)
-stairs(simu.t, simu.u)
-title('Control Inputs')
-hold on;
+    subplot(3,1,3)
+    stairs(simu.t, simu.u)
+    title('Control Inputs')
+    hold on;
 end
 
-if true
-stairs(simu.t, simu.y)
-hold on;
-stairs(simu.t, simu.y)
+if false
+    stairs(simu.t, simu.y)
+    hold on;
+    stairs(simu.t, simu.y)
 end
 
 % analysis
