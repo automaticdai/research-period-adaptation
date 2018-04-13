@@ -79,7 +79,7 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetInputPortRequiredContiguous(S, 0, 1);
 
     // ADC
-    ssSetInputPortWidth(S, 1, CONTROL_TASK_NUMBERS);
+    ssSetInputPortWidth(S, 1, CONTROL_INPUT_NUMBERS);
     ssSetInputPortSampleTime(S, 1, KERNEL_TICK_TIME);
     ssSetInputPortOffsetTime(S, 1, 0.0);
     ssSetInputPortDirectFeedThrough(S, 1, 1);
@@ -90,7 +90,7 @@ static void mdlInitializeSizes(SimStruct *S)
     if (!ssSetNumOutputPorts(S, 3)) return;
 
     // DAC
-    ssSetOutputPortWidth(S, 0, CONTROL_TASK_NUMBERS);
+    ssSetOutputPortWidth(S, 0, CONTROL_OUTPUT_NUMBERS);
     ssSetOutputPortSampleTime(S, 0, KERNEL_TICK_TIME);
     ssSetOutputPortOffsetTime(S, 0, 0.0);
 
@@ -120,7 +120,7 @@ static void mdlInitializeSizes(SimStruct *S)
  	mexPrintf("| RTS Group, Univerisyt of York (c) 2017     | \r");
  	mexPrintf("---------------------------------------------- \r");
     */
-    
+
     /* initialize kernel */
     afbs_initilize(fps);
 
@@ -164,7 +164,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 {
     int_T nInputPorts  = ssGetNumInputPorts(S);
     const real_T *s_ref = ssGetInputPortRealSignal(S, 0);
-    const real_T *s_y   = ssGetInputPortRealSignal(S, 1);
+    const real_T *s_x   = ssGetInputPortRealSignal(S, 1);
 
     int_T nOutputPorts  = ssGetNumOutputPorts(S);
     real_T *s_u         = ssGetOutputPortRealSignal(S, 0);
@@ -178,7 +178,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     }
 
     for (int i = 0; i < ssGetInputPortWidth(S, 1); i++) {
-        afbs_state_in_set(i, s_y[i]);
+        afbs_state_in_set(i, s_x[i]);
     }
 
     /* select a task to run */

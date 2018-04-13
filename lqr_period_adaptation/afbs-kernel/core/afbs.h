@@ -15,7 +15,7 @@
 #define AFBS_PERIOD          (0.010)
 
 #define STATES_REF_NUM       (1)
-#define STATES_IN_NUM        (1)
+#define STATES_IN_NUM        (2)
 #define STATES_OUT_NUM       (1)
 #define PARAM_NUM            (1)
 

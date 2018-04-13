@@ -11,7 +11,8 @@ addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
 global g_Ts;
-g_Ts = 0.100;
+g_Ts = 0.0098;
+
 
 %% Compile the Kernel
 cd('afbs-kernel')
@@ -24,20 +25,41 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 10;
+simu.time = 1000;
 simu.samlping_time = 100 * 10^-6;    % 100 us
-
 
 opt.noise_level = 0;
 opt.disturbance_on = 0;
 
 
 %% System dynamic model
+% first-order system
 % period should be 5% - 10% of the rising time (settling time for 1st order systems)
 % settling time = 4 * tau
-tau = 0.1;
-plant = tf([10],[tau 1]);
-[A,B,C,D] = tf2ss(plant.num{1}, plant.den{1});
+%tau = 0.1;
+%plant = tf([10],[tau 1]);
+
+% second-order system
+plant.sys = zpk([],[-10+10j -10-10j],100);
+plant.model_ss = ss(plant.sys);
+plant.order = order(plant.sys);
+plant.bwcl = bandwidth(feedback(plant.sys, 1));
+
+A = plant.model_ss.a;
+B = plant.model_ss.b;
+C = plant.model_ss.c;
+D = plant.model_ss.d;
+
+% LQR controller
+Q = 1 * eye(plant.order);
+R = 0.1;
+N = zeros(plant.order, 1);
+
+%[K,S,E] = lqrd(A, B, Q, R, N, 0.010);
+[K,S,E] = lqr(A, B, Q, R, N);
+%N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
+N_bar = rscale(A, B, C, D, K);
+
 
 % references
 t = [0:simu.samlping_time:simu.time]';
@@ -63,15 +85,6 @@ d.data = opt.disturbance_on .* d.data;
 d_input.time = t;
 d_input.signals.values = [d.data];
 d_input.signals.dimensions = 1;
-
-
-%% Controller Parameters
-Q = 1;
-R = 1;
-N = 0;
-[K,S,E] = lqr(A, B, Q, R, N);
-%N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
-N_bar = rscale(A, B, C, D, K);
 
 
 %% Run Simulink model

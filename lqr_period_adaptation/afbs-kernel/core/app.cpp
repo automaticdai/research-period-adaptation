@@ -8,12 +8,12 @@ int TASK_3_PERIOD = 0; // adapative
 int TASK_1_IDX = 5;
 
 int task_config[TASK_NUMBERS][5] = {
-{0,   7,  12, 0, 0},
-{1,   8, 121, 0, 0},
-{2,   2, 203, 0, 0},
-{3,   2, 152, 0, 0},
-{4,   3, 202, 0, 0},
-{5,   1,   1, 0, 0},
+{0,   70,   120, 0, 0},
+{1,   80,  1210, 0, 0},
+{2,   20,  2030, 0, 0},
+{3,   20,  1520, 0, 0},
+{4,   30,  2020, 0, 0},
+{5,  100,   100, 0, 0},
 };
 /*
 int task_config[TASK_NUMBERS][5] = {
@@ -40,7 +40,7 @@ void task_init(void) {
     TASK_2_PERIOD = afbs_get_param(1) / KERNEL_TICK_TIME;
     TASK_3_PERIOD = afbs_get_param(2) / KERNEL_TICK_TIME;
 
-    class Task tau1(TASK_1_IDX, 10, TASK_1_PERIOD, 0, 0);
+    class Task tau1(TASK_1_IDX, 100, TASK_1_PERIOD, 0, 0);
     //class Task tau2(7, 20, TASK_2_PERIOD, 0, 0);
     //class Task tau3(8, 20, TASK_3_PERIOD, 0, 0);
     afbs_create_task(tau1, NULL, task_1_start_hook, task_1_finish_hook);
@@ -55,18 +55,19 @@ void task_init(void) {
 
 /*-- control tasks -----------------------------------------------------------*/
 double ref;
-double y;
+double x1;
+double x2;
 
 void task_1_start_hook(void) {
     ref = afbs_state_ref_load(0);
-    y = afbs_state_in_load(0);
+    x1 = afbs_state_in_load(0);
+    x2 = afbs_state_in_load(1);
 
-    double N = 0.1005;
-    double K = 0.0499;
-    double C = 100;
+    /* LQR parameters */
+    double N = 2.2978;
+    double K[] = {0.0382, 1.1390};
 
-    double x = y / C;
-    double u = -1 * K * x + N * ref;
+    double u = N * ref - (K[0] * x1 + K[1] * x2);
     afbs_state_out_set(0, u);
 
     return;

@@ -317,8 +317,14 @@ double analysis_steady_state_time(void) {
 
 
 void afbs_performance_monitor(void) {
+    double C = 3.9528;
+    
+    double x1 = 0;
+    double x2 = 0;
     // evaluate system performance
-    y_trace[y_idx] = afbs_state_in_load(0);
+    x1 = afbs_state_in_load(0);
+    x2 = afbs_state_in_load(1);
+    y_trace[y_idx] = C * x1;
 
     if (y_idx < TRACE_BUFFER_SIZE - 1) {
         y_idx += 1;
