@@ -24,8 +24,9 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 1000;
-simu.samlping_time = 0.000100;
+simu.time = 10;
+simu.samlping_time = 100 * 10^-6;    % 100 us
+
 
 opt.noise_level = 0;
 opt.disturbance_on = 0;
@@ -74,7 +75,7 @@ N_bar = rscale(A, B, C, D, K);
 
 
 %% Run Simulink model
-mdl = 'lqr_period_with_r_and_d_simulink';
+mdl = 'lqr_period_afbs_simu';
 open_system(mdl);
 
 % record in diary
