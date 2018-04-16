@@ -1,4 +1,4 @@
-function [ Ts ] = compute_steady_state_time(y, t, ref, tolerance_prec)
+function [ Ts, Ts_idx ] = compute_steady_state_time(y, t, ref, tolerance_prec)
 % [Inputs] 
 % y: system response
 % t: time sequence

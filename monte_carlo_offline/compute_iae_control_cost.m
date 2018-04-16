@@ -1,11 +1,10 @@
-function [ iae_cost ] = compute_iae_control_cost(x_stream, u_stream, Ts, Q1, Q12, Q2)
+function [ iae_cost ] = compute_iae_control_cost(x_stream, Ts)
 
 iae_cost = 0;
 
-for i = 1:numel(u_stream)
+for i = 1: size(x_stream, 1)
     
 x = x_stream(i,:)';
-u = u_stream(i,:)';
 
 % Calculate the quadratic cost of a control system
 

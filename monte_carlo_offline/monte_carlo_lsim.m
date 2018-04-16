@@ -44,9 +44,12 @@ while i < 1000
             g_time = 0;
 
             % s0 -> s1: first job release delay
-            %simu.tr = 0;
-            simu.tr = task.T * rand(1);
-
+            if conf.sync_on
+                simu.tr = 0;
+            else
+                simu.tr = task.T * rand(1);
+            end
+            
             t = 0:conf.simu_samplingtime:simu.tr;
             noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
             u = ones(numel(t), 1) * ctrl.u + noises;
@@ -177,10 +180,10 @@ if false
 end
 
 % analysis
-simu.tss = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
-simu.cost = compute_quadratic_control_cost(simu.x, simu.u, conf.simu_samplingtime, Q, N, R);
-simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
-simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y, simu.u, conf.simu_samplingtime, 1, 0, 0);
+[simu.tss, tss_idx] = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
+simu.cost = compute_quadratic_control_cost(simu.x(1:tss_idx, :), simu.u(1:tss_idx), conf.simu_samplingtime, Q, N, R);
+simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
+simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
 
 pi.T   = [pi.T task.T];
 pi.Tss = [pi.Tss simu.tss];
