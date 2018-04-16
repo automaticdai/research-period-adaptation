@@ -288,7 +288,8 @@ double pi_trace[TRACE_PI_SIZE];
 double tss = -1;
 double tss_target = 0.28;
 
-double cost = 0;
+double cost_ISE = 0;
+double cost_IAE = 0;
 
 double analysis_steady_state_time(void) {
     int i = 0;
@@ -301,15 +302,18 @@ double analysis_steady_state_time(void) {
         }
     }
 
-    cost = 0;
-
+    cost_ISE = 0;
+    cost_IAE = 0;
+    
     if (ref_diff == 0) {
         /* first operation, no ref_diff */
         ;
     } else {
         for (i = 0; i < tss_idx; i++) {
-            cost += (y_trace[i] - ref_last) / abs(ref_diff)
-                 * (y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
+            cost_ISE += ((y_trace[i] - ref_last) / abs(ref_diff))
+                 * ((y_trace[i] - ref_last) / abs(ref_diff)) * KERNEL_TICK_TIME;
+            
+            cost_IAE += abs(y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
         }
     }
     return double(tss_idx) * KERNEL_TICK_TIME;
@@ -339,7 +343,7 @@ void afbs_performance_monitor(void) {
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         tss = analysis_steady_state_time();
-        mexPrintf("%f, %f, %f, 0 \r", afbs_get_current_time(), tss, cost);
+        mexPrintf("%f, %f, %f, %f, 0 \r", afbs_get_current_time(), tss, cost_ISE, cost_IAE);
 
         /* Policy 1 */
         /*

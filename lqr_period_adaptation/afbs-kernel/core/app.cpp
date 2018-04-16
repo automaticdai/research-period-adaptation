@@ -85,7 +85,7 @@ void task_1_finish_hook(void) {
 
      */
 
-    mexPrintf("%f, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
+    mexPrintf("%f, 0, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
 
     return;
 }
