@@ -11,7 +11,7 @@ addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
 global g_Ts;
-g_Ts = 0.0098;
+g_Ts = 0.010;
 
 
 %% Compile the Kernel
