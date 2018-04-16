@@ -30,6 +30,9 @@ simu.u = [0];
 simu.t = [0];
 simu.ut = [0];
 
+ctrl.x = 0;
+ctrl.u = 0;
+
 % Simulation inner loop
 i = 0;
 
@@ -75,6 +78,7 @@ while i < 1000
         case 2
             % s2: task activated, sampling input
             ctrl.x = simu.x(end, 1:plant.order)';
+            ctrl.y = C * ctrl.x;
 
             % s2 -> s3: task executing
             % sampling response time

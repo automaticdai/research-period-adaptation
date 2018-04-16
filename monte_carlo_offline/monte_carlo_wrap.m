@@ -6,6 +6,7 @@
 
 % for reproducibility
 rng default
+%rng(100)
 
 %% Configurations
 % define task model
@@ -51,17 +52,18 @@ task.runtime.wcrt = wcrt_a(end);
 assert(task.runtime.wcrt <= task.T_L)
 
 % define simulation parameter
-conf.simu_times = 1000;
+conf.simu_times = 10;
 conf.simu_time_min = 1.0;
-conf.simu_samplingtime = 0.000100;
+conf.simu_samplingtime = 1 * 10^-4;
 
 conf.noise_on = 0;
 conf.noise_level = -20;
 
-conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
+conf.sampling_method = 3; % 1: uniform, 2: norm, 3: empirical
 
 if (conf.sampling_method == 3)
     % load Ri distribution
+    load('ri_afbs_10ms')
     task.runtime.ri = ri;
 end
 
