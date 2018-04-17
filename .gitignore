@@ -1,4 +1,8 @@
+# MATLAB/simulink temporary output
 **/slprj/
-**/result_*
-*.autosave
 *.mexw64
+*.autosave
+
+# Data
+*.mat
+*.txt
