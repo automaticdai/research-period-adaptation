@@ -59,7 +59,7 @@ conf.simu_samplingtime = 1 * 10^-4;
 conf.noise_on = 0;
 conf.noise_level = -20;
 
-conf.sampling_method = 3; % 1: uniform, 2: norm, 3: empirical
+conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
 conf.sync_on = 0;         % sync of the first release job
 
 if (conf.sampling_method == 3)
@@ -76,9 +76,12 @@ pi.IAE = [];
 pi.ISE = [];
 
 %% Run Simulation
-for period = 0.010:0.001:0.010 %task.T_L:0.001:task.T_U
+for period = 0.010:0.001:0.015 %task.T_L:0.001:task.T_U
     task.T = period;
     run('monte_carlo_lsim.m')
+    
+    %save('pi_.mat','pi','task','plant','ctrl','conf')
+    save(['pi_mc_uniform_' num2str(period * 1000) 'ms.mat'], ...
+          'pi','task','plant','ctrl','conf')
 end
 
-save('pi_.mat','pi','task','plant','ctrl','conf')

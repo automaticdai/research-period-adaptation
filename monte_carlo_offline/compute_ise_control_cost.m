@@ -1,10 +1,10 @@
-function [ ise_cost ] = compute_ise_control_cost(x_stream, Ts)
+function [ ise_cost ] = compute_ise_control_cost(y_stream, Ts)
 
 ise_cost = 0;
 
-for i = 1: size(x_stream, 1)
+for i = 1: size(y_stream, 1)
     
-x = x_stream(i,:)';
+x = y_stream(i,:)';
 
 % Calculate the quadratic cost of a control system
 
