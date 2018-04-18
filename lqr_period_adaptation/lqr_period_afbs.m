@@ -25,8 +25,8 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 1000;
-simu.samlping_time = 100 * 10^-6;    % 100 us
+simu.time = 10;
+simu.sampling_time = 100 * 10^-6;    % 100 us
 
 opt.noise_level = 0;
 opt.disturbance_on = 0;
@@ -62,7 +62,7 @@ N_bar = rscale(A, B, C, D, K);
 
 
 % references
-t = [0:simu.samlping_time:simu.time]';
+t = [0:simu.sampling_time:simu.time]';
 
 rng(1);ref_sequence = randi(10, 1, 100) * 0.5;
 ref_sampling_time = 1.4567;
@@ -109,7 +109,7 @@ diary off;
 
 
 %% output error
-%state_cost = compute_quadratic_control_cost(ref - y, 0, simu.samlping_time, 1, 0, 0);
-%control_cost = compute_quadratic_control_cost(0, u, simu.samlping_time, 0, 0, 1);
+%state_cost = compute_quadratic_control_cost(ref - y, 0, simu.sampling_time, 1, 0, 0);
+%control_cost = compute_quadratic_control_cost(0, u, simu.sampling_time, 0, 0, 1);
 %fprintf('State cost: %f \r\n', state_cost);
 %fprintf('Control cost: %f \r\n', control_cost);
