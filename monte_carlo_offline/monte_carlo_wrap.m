@@ -50,17 +50,15 @@ task.runtime.bcrt = bcrt_a(end);
 task.runtime.wcrt = wcrt_a(end);
 
 assert(task.runtime.wcrt <= task.T_L)
+assert(task.runtime.wcrt >= task.runtime.bcrt)
 
 % define simulation parameter
-conf.simu_times = 1000;
-conf.simu_time_min = 1.0;
+conf.simu_times = 3000;
+conf.simu_time_max = 0.5;
 conf.simu_samplingtime = 1 * 10^-4;
 
-conf.noise_on = 0;
-conf.noise_level = -20;
-
-conf.sampling_method = 1; % 1: uniform, 2: norm, 3: empirical
-conf.sync_on = 0;         % sync of the first release job
+conf.sampling_method = 1; % response time: 1: uniform, 2: norm, 3: empirical
+conf.sync_mode = 1;       % sync of the first release job, 0: full, 1: not sync, 2: worst-case
 
 if (conf.sampling_method == 3)
     % load Ri distribution
@@ -68,20 +66,24 @@ if (conf.sampling_method == 3)
     task.runtime.ri = ri;
 end
 
-% performance indices
-pi.T = [];
-pi.Tss = [];
-pi.J = [];
-pi.IAE = [];
-pi.ISE = [];
+conf.noise_on = 0;
+conf.noise_level = -20;
+
 
 %% Run Simulation
-for period = 0.010:0.001:0.015 %task.T_L:0.001:task.T_U
+for period = 0.016:0.001:0.025 %task.T_L:0.001:task.T_U
     task.T = period;
+    
+    % performance indices
+    pi.T = [];
+    pi.Tss = [];
+    pi.J = [];
+    pi.IAE = [];
+    pi.ISE = [];
+    
+    % run monte carlo simulation
     run('monte_carlo_lsim.m')
     
-    %save('pi_.mat','pi','task','plant','ctrl','conf')
-    save(['pi_mc_uniform_' num2str(period * 1000) 'ms.mat'], ...
+    save(['./result_temp/' 'pi_mc_uniform_' num2str(period * 1000) 'ms.mat'], ...
           'pi','task','plant','ctrl','conf')
 end
-

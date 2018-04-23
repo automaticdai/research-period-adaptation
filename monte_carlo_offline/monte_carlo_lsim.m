@@ -44,10 +44,13 @@ while i < 1000
             g_time = 0;
 
             % s0 -> s1: first job release delay
-            if conf.sync_on
-                simu.tr = 0;
-            else
-                simu.tr = task.T * rand(1);
+            switch conf.sync_mode
+                case 0
+                    simu.tr = 0;
+                case 1
+                    simu.tr = task.T * rand(1);
+                case 2
+                    simu.tr = task.T;
             end
             
             t = 0:conf.simu_samplingtime:simu.tr;
@@ -141,7 +144,7 @@ while i < 1000
             g_time = g_time + simu.tr;
             simu.state = 1;
 
-            if (g_time > conf.simu_time_min)
+            if (g_time > conf.simu_time_max)
                 break
             end
 
@@ -156,7 +159,6 @@ end
 
 % plot result (optional)
 if false
-    figure()
     subplot(3,1,1)
     stairs(simu.t, simu.y)
     title('Response')
@@ -173,14 +175,9 @@ if false
     hold on;
 end
 
-if false
-    stairs(simu.t, simu.y)
-    hold on;
-    stairs(simu.t, simu.y)
-end
 
 % analysis
-[simu.tss, tss_idx] = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
+[simu.tss, tss_idx] = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.02);
 simu.cost = compute_quadratic_control_cost(simu.x(1:tss_idx, :), simu.u(1:tss_idx), conf.simu_samplingtime, Q, N, R);
 simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
 simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
