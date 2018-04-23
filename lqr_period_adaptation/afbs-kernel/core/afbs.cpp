@@ -181,7 +181,7 @@ void afbs_update(void)
 {
     for (int i = 0; i < TASK_MAX_NUM; i++) {
         if (TCB[i].status_ != deleted) {
-            if (--TCB[i].r_ == 0) {
+            if (TCB[i].r_-- == 0) {
                 // check if a task missed its deadline
                 if (TCB[i].c_ != 0) {
                     TCB[i].on_task_missed_deadline();
@@ -296,8 +296,10 @@ double analysis_steady_state_time(void) {
     int tss_idx = 0;
 
     for (i = 0; i < y_idx; i++) {
+        // find when the system enters steady-state
         // 0.2 is steady-state error
-        if ((y_trace[i] > ref_last + 0.05) || (y_trace[i] < ref_last - 0.05)) {
+        if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001) 
+           || (y_trace[i] < ref_last - 0.02 * ref_last - 0.001)) {
             tss_idx = i;
         }
     }

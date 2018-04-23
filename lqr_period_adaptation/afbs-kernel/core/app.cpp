@@ -59,31 +59,21 @@ double x1;
 double x2;
 
 void task_1_start_hook(void) {
+    /* sample inputs */
     ref = afbs_state_ref_load(0);
     x1 = afbs_state_in_load(0);
     x2 = afbs_state_in_load(1);
 
+    return;
+}
+
+void task_1_finish_hook(void) {
     /* LQR parameters */
     double N = 2.2978;
     double K[] = {0.0382, 1.1390};
 
     double u = N * ref - (K[0] * x1 + K[1] * x2);
     afbs_state_out_set(0, u);
-
-    return;
-}
-
-void task_1_finish_hook(void) {
-    /*
-    double N = 0.1005;
-    double K = 0.0499;
-    double C = 100;
-
-    double x = y / C;
-    double u = -1 * K * x + N * ref;
-    afbs_state_out_set(0, u);
-
-     */
 
     mexPrintf("%f, 0, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
 
