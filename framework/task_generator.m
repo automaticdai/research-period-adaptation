@@ -1,45 +1,47 @@
 % task_generator.m
 % generate synthetic task sets
 
-U_bar = 1.0;
-Ti_lower = 0.010;
-Ti_upper = 1.0;
-task_n = 10000;
+%% Parameters
+N = 10;                             % number of tasks
+U_bound = N * (power(2, 1/N) - 1);  % utilization boundary
+U_bar = 0.5;                        % desired utilization
+Ti_lower = 100;                     % taskset period upper bound
+Ti_upper = 100000;                  % taskset period lower bound
 
-Ui = zeros(task_n, 1);
-Ci = zeros(task_n, 1);
-Ti = zeros(task_n, 1);
-Di = zeros(task_n, 1);
+Ui = zeros(N, 1);
+Ci = zeros(N, 1);
+Ti = zeros(N, 1);
+Di = zeros(N, 1);
+
 
 %% Generate task utilization with UUnifast
-Ui = UUniFast(task_n, U_bar);
+Ui = UUniFast(N, U_bar);
 Ui = Ui';
 
+% f1 = figure();
+% histogram(Ui, 'Normalization', 'Probability')
+% title('Utilization')
 
-%% Generate task periods
+
+%% Generate task periods with log-uniformed distribution
 LA = log10(Ti_lower);
 LB = log10(Ti_upper);
-Ti = 10 .^ (LA + (LB-LA) * rand(1, task_n));
+Ti = 10 .^ (LA + (LB-LA) * rand(1, N));
 Ti = Ti';
 
+% f2 = figure();
+% histogram(Ti, 'Normalization', 'Probability')
+% title('Periods')
 
-%% Obtain task computation times
+
+%% Calculate task computation times
 Ci = Ui .* Ti;
 
 
 %% Put everything into taskset[]
 Di = Ti;
-taskset = [zeros(task_n, 1), Ci, Ti, Di];
+taskset = [zeros(N, 1), Ci, Ti, Di];
 
 % print
-fprintf('\r Generated Taskset: (Pi, Ci, Ti, Di == Ti) \r\r');
+fprintf('\r Generated Taskset (Pi, Ci, Ti, Di == Ti): \r\r');
 disp(taskset);
-
-% show in diagram
-f1 = figure();
-histogram(Ui, 'Normalization', 'Probability')
-title('Utilization')
-
-f2 = figure();
-histogram(Ti, 'Normalization', 'Probability')
-title('Periods')
