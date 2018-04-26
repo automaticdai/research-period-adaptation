@@ -5,8 +5,8 @@
 N = 10;                             % number of tasks
 U_bound = N * (power(2, 1/N) - 1);  % utilization boundary
 U_bar = 0.5;                        % desired utilization
-Ti_lower = 100;                     % taskset period upper bound
-Ti_upper = 100000;                  % taskset period lower bound
+Ti_lower = 100;                     % taskset period upper bound (unit:10us)
+Ti_upper = 1000;                    % taskset period lower bound (unit:10us)
 
 Ui = zeros(N, 1);
 Ci = zeros(N, 1);
@@ -38,10 +38,16 @@ Ti = Ti';
 Ci = Ui .* Ti;
 
 
-%% Put everything into taskset[]
+%% Put everything into taskset[], truncate and sort with RM
 Di = Ti;
-taskset = [zeros(N, 1), Ci, Ti, Di];
+taskset = [zeros(N, 1), floor(Ci), floor(Ti), floor(Di)];
+
+[~,idx] = sort(taskset(:,3)); % sort just the first column
+taskset = taskset(idx,:);     % sort the whole matrix using the sort indices
+taskset(:,1) = [0:size(taskset,1)-1]';
 
 % print
 fprintf('\r Generated Taskset (Pi, Ci, Ti, Di == Ti): \r\r');
 disp(taskset);
+
+fprintf('The actual task total utilization is: %0.3f \r', sum(taskset(:,2) ./ taskset(:,3)));

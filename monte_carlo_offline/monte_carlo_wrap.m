@@ -38,13 +38,23 @@ ctrl.u = 0;
 ctrl.y = 0;
 ctrl.ref = 1;
 
-% define task model
+
+%% Task model
+kernel_time = 10 * 10^-6;      % 10us
+
 task.T_U = 0.6 / plant.bwcl;
 task.T_L = 0.2 / plant.bwcl;
-task.T = 0.000;                 % 10ms - 30ms
+task.T = 1000;                 % task designed period (in kernel time)
+task.C = 100;                  % task WCET (in kernel time)
 
-% RTA to get BCRT and WCRT
-run('rta_test.m')
+% define task set
+taskset = [taskset; size(taskset,1), task.C, task.T, task.T];
+
+% RTA to get BCRT and WCRT  
+[bcrt, wcrt] = rta(taskset);
+
+bcrt_a = bcrt .* kernel_time;
+wcrt_a = wcrt .* kernel_time;
 
 task.runtime.bcrt = bcrt_a(end);
 task.runtime.wcrt = wcrt_a(end);
@@ -52,16 +62,21 @@ task.runtime.wcrt = wcrt_a(end);
 assert(task.runtime.wcrt <= task.T_L)
 assert(task.runtime.wcrt >= task.runtime.bcrt)
 
-% define simulation parameter
+
+%% Simulation parameters
 conf.simu_times = 3000;
 conf.simu_time_max = 0.5;
 conf.simu_samplingtime = 1 * 10^-4;
 
-conf.sampling_method = 1; % response time: 1: uniform, 2: norm, 3: empirical
+conf.period_min = 0.010;
+conf.period_max = 0.025;
+conf.period_step = 0.001;
+
 conf.sync_mode = 1;       % sync of the first release job, 0: full, 1: not sync, 2: worst-case
+conf.sampling_method = 1; % response time: 1: uniform, 2: norm, 3: empirical
 
 if (conf.sampling_method == 3)
-    % load Ri distribution
+    % load Ri distribution profile
     load('ri_afbs_10ms')
     task.runtime.ri = ri;
 end
@@ -71,7 +86,7 @@ conf.noise_level = -20;
 
 
 %% Run Simulation
-for period = 0.016:0.001:0.025 %task.T_L:0.001:task.T_U
+for period = 0.010:0.001:0.025 %task.T_L:0.001:task.T_U
     task.T = period;
     
     % performance indices
@@ -84,6 +99,6 @@ for period = 0.016:0.001:0.025 %task.T_L:0.001:task.T_U
     % run monte carlo simulation
     run('monte_carlo_lsim.m')
     
-    save(['./result_temp/' 'pi_mc_uniform_' num2str(period * 1000) 'ms.mat'], ...
+    save(['./_temp/' 'pi_mc_uniform_' num2str(period * 1000) 'ms.mat'], ...
           'pi','task','plant','ctrl','conf')
 end

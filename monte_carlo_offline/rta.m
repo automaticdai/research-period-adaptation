@@ -1,5 +1,5 @@
 % Response Time Analysis for Fixed Priority Scheduling
-% input: taskset array, task of interest, format [Pi, Ti, Ci, Di]
+% input: taskset matrix, format [Pi, Ci, Ti, Di]
 % output: [BCRT, WCRT]
 function [bcrt wcrt] = rta(taskset)
 

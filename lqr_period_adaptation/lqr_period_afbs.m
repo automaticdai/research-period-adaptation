@@ -25,7 +25,7 @@ cd('..')
 % task periods
 parameters = [g_Ts];
 
-simu.time = 10;
+simu.time = 1000;
 simu.sampling_time = 100 * 10^-6;    % 100 us
 
 opt.noise_level = 0;
@@ -65,7 +65,7 @@ N_bar = rscale(A, B, C, D, K);
 t = [0:simu.sampling_time:simu.time]';
 
 rng(1);ref_sequence = randi(10, 1, 100) * 0.5;
-ref_sampling_time = 1.4567;
+ref_sampling_time = 1.45672;
 
 %sim('reference_generator');
 %ref = ref.data;
