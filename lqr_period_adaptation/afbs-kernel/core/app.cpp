@@ -75,7 +75,7 @@ void task_1_finish_hook(void) {
     double u = N * ref - (K[0] * x1 + K[1] * x2);
     afbs_state_out_set(0, u);
 
-    mexPrintf("%f, 0, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
+    //mexPrintf("%f, 0, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
 
     return;
 }

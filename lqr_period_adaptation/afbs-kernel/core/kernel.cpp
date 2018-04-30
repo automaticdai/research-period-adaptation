@@ -4,7 +4,7 @@
  *    Simulink s-function.
  */
 
-#define S_FUNCTION_NAME kernel
+#define S_FUNCTION_NAME kernel      /* name of the s-function */
 #define S_FUNCTION_LEVEL 2
 
 #include <math.h>
@@ -15,10 +15,6 @@
 /*************************************************************************/
 #include "afbs.h"
 #include "app.h"
-
-double alpha = 0;
-float  error[CONTROL_TASK_NUMBERS];
-int    param;
 
 /*====================*
  * S-function methods *
