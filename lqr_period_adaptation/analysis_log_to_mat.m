@@ -1,5 +1,5 @@
 
-Ti = 10;
+Ti = 19;
 filename = ['log_' num2str(Ti) 'ms'];
 csv_data_all = csvread([filename '.txt']);
 

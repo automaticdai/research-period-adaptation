@@ -10,8 +10,8 @@ addpath('./afbs-kernel/')
 addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
-global g_Ts;
-g_Ts = 0.010;
+global g_TaskPeriod;
+g_TaskPeriod = 0.019;
 
 
 %% Compile the Kernel
@@ -22,14 +22,8 @@ cd('..')
 
 
 %% Simulation parameters
-% task periods
-parameters = [g_Ts];
-
-simu.time = 1000;
+simu.time = 5;
 simu.sampling_time = 100 * 10^-6;    % 100 us
-
-opt.noise_level = 0;
-opt.disturbance_on = 0;
 
 
 %% System dynamic model
@@ -45,6 +39,9 @@ plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
 plant.bwcl = bandwidth(feedback(plant.sys, 1));
 
+plant.noise_level = 0;
+plant.disturbance_on = 0;
+
 A = plant.model_ss.a;
 B = plant.model_ss.b;
 C = plant.model_ss.c;
@@ -59,8 +56,11 @@ N = zeros(plant.order, 1);
 [K,S,E] = lqr(A, B, Q, R, N);
 %N_bar = (-1 * C * (A - B * K - 1)^(-1) * B) ^ (-1);
 N_bar = rscale(A, B, C, D, K);
+ctrl.K = K;
+ctrl.N_bar = N_bar;
 
 
+%% External signals
 % references
 t = [0:simu.sampling_time:simu.time]';
 
@@ -74,14 +74,14 @@ ref_sampling_time = 1.45672;
 %ref_input.signals.dimensions = 1;
 
 % noises
-noise = opt.noise_level .* randn(numel(t), 1);
+noise = plant.noise_level .* randn(numel(t), 1);
 noise_input.time = t;
 noise_input.signals.values = [noise];
 noise_input.signals.dimensions = 1;
 
 % disturbances
 sim('disturbance_generator');
-d.data = opt.disturbance_on .* d.data;
+d.data = plant.disturbance_on .* d.data;
 d_input.time = t;
 d_input.signals.values = [d.data];
 d_input.signals.dimensions = 1;
@@ -90,6 +90,7 @@ d_input.signals.dimensions = 1;
 %% Run Simulink model
 mdl = 'lqr_period_afbs_simu';
 open_system(mdl);
+afbs_parameters = [g_TaskPeriod];       % passing parameters to AFBS-kernel
 
 % record in diary
 if (exist('log.txt', 'file') == 2)
@@ -104,11 +105,11 @@ sim(mdl);
 
 diary off;
 
-%filename = sprintf('Ts_%d.mat', g_Ts);
+%filename = sprintf('Ts_%d.mat', g_TaskPeriod);
 %save(filename, 'plant', 't', 'ref', 'y', 'u');
 
 
-%% output error
+%% Output results
 %state_cost = compute_quadratic_control_cost(ref - y, 0, simu.sampling_time, 1, 0, 0);
 %control_cost = compute_quadratic_control_cost(0, u, simu.sampling_time, 0, 0, 1);
 %fprintf('State cost: %f \r\n', state_cost);
