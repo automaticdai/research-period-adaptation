@@ -2,9 +2,9 @@
 % generate synthetic task sets
 
 %% Parameters
-N = 10;                             % number of tasks
+N = 5;                             % number of tasks
 U_bound = N * (power(2, 1/N) - 1);  % utilization boundary
-U_bar = 0.5;                        % desired utilization
+U_bar = 0.6;                        % desired utilization
 Ti_lower = 100;                     % taskset period upper bound (unit:10us)
 Ti_upper = 1000;                    % taskset period lower bound (unit:10us)
 

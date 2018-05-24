@@ -4,23 +4,40 @@
 % Xiaotian Dai
 % University of York
 % -------------------------------------------------------------------------
+% Example of a single experiment. Used data are pre-calculated.
+% -------------------------------------------------------------------------
 
-%% configurations
-conf.prediction_horizon = 1;
-conf.step_size = 100; % period change step in 0.1 ms
+%% experiment configurations
+% framework parameters
+framework.conf.prediction_horizon = 1;  %
+framework.conf.init_period = 100;
+framework.conf.step_size = 100;         % period change step in 0.1 ms
 
-conf.PI_exp = 0.80;
-conf.PI_min = 0.70;
-conf.decision_confidence = 0.95;
+framework.conf.PI_exp = 0.80;
+framework.conf.PI_min = 0.70;
+framework.conf.decision_confidence = 0.95;
+framework.conf.retry_times = 3;
+
+
+% system dynamics
+framework.system = 0;
+
+
+% taskset
+framework.taskset = 0;
+
+
+% traces
+framework.trace = 0;
+
 
 
 %% algorithm starts here
-observe(1000);
+pi = observe(1000);
 
 % make predictions using cloud based application
 predict(1000);
-predict(1100);
-predict(1200);
+
 
 % make decision based on predictions
 if (decision_making())
