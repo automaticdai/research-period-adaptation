@@ -10,19 +10,18 @@ addpath('./afbs-kernel/')
 addpath('./afbs-kernel/core')
 addpath('./toolbox/')
 
-global g_TaskPeriod;
-g_TaskPeriod = 0.019;
-
+%g_TaskPeriod = 0.01000;
 
 %% Compile the Kernel
 cd('afbs-kernel')
 mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ...
        ./core/task.cpp
+mex -g ./sfun_reference_cpp.cpp
 cd('..')
 
 
 %% Simulation parameters
-simu.time = 5;
+simu.time = 1000;
 simu.sampling_time = 100 * 10^-6;    % 100 us
 
 
@@ -39,7 +38,7 @@ plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
 plant.bwcl = bandwidth(feedback(plant.sys, 1));
 
-plant.noise_level = 0;
+plant.noise_level = 1e-1;
 plant.disturbance_on = 0;
 
 A = plant.model_ss.a;
@@ -61,11 +60,11 @@ ctrl.N_bar = N_bar;
 
 
 %% External signals
-% references
 t = [0:simu.sampling_time:simu.time]';
 
-rng(1);ref_sequence = randi(10, 1, 100) * 0.5;
-ref_sampling_time = 1.45672;
+% references (legency)
+%rng(1);ref_sequence = randi(10, 1, 100) * 0.5;
+%ref_sampling_time = 1.45672;
 
 %sim('reference_generator');
 %ref = ref.data;
@@ -79,12 +78,12 @@ noise_input.time = t;
 noise_input.signals.values = [noise];
 noise_input.signals.dimensions = 1;
 
-% disturbances
-sim('disturbance_generator');
-d.data = plant.disturbance_on .* d.data;
-d_input.time = t;
-d_input.signals.values = [d.data];
-d_input.signals.dimensions = 1;
+% disturbances (legency)
+% sim('disturbance_generator');
+% d.data = plant.disturbance_on .* d.data;
+% d_input.time = t;
+% d_input.signals.values = [d.data];
+% d_input.signals.dimensions = 1;
 
 
 %% Run Simulink model
@@ -93,11 +92,12 @@ open_system(mdl);
 afbs_parameters = [g_TaskPeriod];       % passing parameters to AFBS-kernel
 
 % record in diary
-if (exist('log.txt', 'file') == 2)
-    delete('log.txt');
+log_file_name = sprintf('./logs/log%.0f.log', g_TaskPeriod * 1e5);
+if (exist(log_file_name, 'file') == 2)
+    delete(log_file_name);
 end
 
-diary('log.txt');
+diary(log_file_name);
 diary on;
 
 % start simulation
