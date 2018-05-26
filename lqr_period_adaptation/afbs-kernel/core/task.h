@@ -1,6 +1,8 @@
 #ifndef __TASK_H_
 #define __TASK_H_
 
+#include <random>
+
 using namespace std;
 
 extern long kernel_cnt;
@@ -15,18 +17,24 @@ public:
     int D_;
     int T_;
     int R_;
+
     int c_;     // computation time countdown
     int d_;     // deadline countdown
     int r_;     // next release countdown
     int cnt_;   // release count
-    
+
     int type_;  // task type: periodic, sporadic, run_once
-    
+
     /* variables used for calc response time */
     long release_time_cnt;
     long start_time_cnt;
     long finish_time_cnt;
-    
+
+    /* statistics */
+    int BCRT_; // task best-case response time
+    int WCRT_; // task worst-case response time
+
+
     enum_task_status status_;
     callback onstart_hook_;
     callback onfinish_hook_;
@@ -46,12 +54,15 @@ public:
         cnt_ = 0;
         onstart_hook_ = NULL;
         onfinish_hook_ = NULL;
-        
+
         type_ = 0;
-        
+
         release_time_cnt = 0;
         start_time_cnt = 0;
         finish_time_cnt = 0;
+
+        BCRT_ = 100000;
+        WCRT_ = 0;
     }
 
     ~Task() { ; }

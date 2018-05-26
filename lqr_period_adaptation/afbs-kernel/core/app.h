@@ -6,7 +6,7 @@
 #define CONTROL_INPUT_NUMBERS  (2)
 #define CONTROL_OUTPUT_NUMBERS (1)
 
-void task_init(void);
+void app_init(void);
 
 void afbs_start_hook(void);
 

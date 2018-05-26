@@ -27,27 +27,26 @@ int task_config[TASK_NUMBERS][5] = {
 };
 */
 
-void task_init(void) {
-
-    for (int i = 0; i < TASK_NUMBERS; i++) {
-        class Task t1(task_config[i][0], task_config[i][1], task_config[i][2],
-                    task_config[i][3], task_config[i][4]);
-        afbs_create_task(t1, NULL, NULL, NULL);
-    }
-
-    /* override some tasks for control tasks */
+void app_init(void) {
+    /* read parameters */
     TASK_1_PERIOD = afbs_get_param(0) / KERNEL_TICK_TIME;
     TASK_2_PERIOD = afbs_get_param(1) / KERNEL_TICK_TIME;
     TASK_3_PERIOD = afbs_get_param(2) / KERNEL_TICK_TIME;
 
+    /* initialize task list */
+    for (int i = 0; i < TASK_NUMBERS; i++) {
+        class Task ti(task_config[i][0], task_config[i][1], task_config[i][2],
+                    task_config[i][3], task_config[i][4]);
+        afbs_create_task(ti, NULL, NULL, NULL);
+    }
+
+    /* override some tasks for control tasks */
     class Task tau1(TASK_1_IDX, 100, TASK_1_PERIOD, 0, 0);
     //class Task tau2(7, 20, TASK_2_PERIOD, 0, 0);
     //class Task tau3(8, 20, TASK_3_PERIOD, 0, 0);
     afbs_create_task(tau1, NULL, task_1_start_hook, task_1_finish_hook);
     //afbs_create_task(tau2, NULL, task_2_start_hook, task_2_finish_hook);
     //afbs_create_task(tau3, NULL, task_3_start_hook, task_3_finish_hook);
-
-    //mexPrintf("t_stamp, tss, j_cost \r");
 
     return;
 }
@@ -72,10 +71,11 @@ void task_1_finish_hook(void) {
     double N = 2.2978;
     double K[] = {0.0382, 1.1390};
 
+    /* Calculate Outputs */
     double u = N * ref - (K[0] * x1 + K[1] * x2);
-    afbs_state_out_set(0, u);
 
-    //mexPrintf("%f, 0, 0, 0, %ld \r", afbs_get_current_time(), afbs_report_task_last_response_time(afbs_get_running_task_id()));
+    /* Send output to Simulink */
+    afbs_state_out_set(0, u);
 
     return;
 }

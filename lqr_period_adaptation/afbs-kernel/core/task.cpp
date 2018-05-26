@@ -12,32 +12,61 @@ char *task_status_literal[] = {
     { "deleted" }
 };
 
+std::default_random_engine generator;
+
 void Task::on_task_ready(void) {
-    c_ = C_;
+
+    /* generate random task execution time */
+    int max = C_;
+    int min = C_ / 2;
+
+    float mu = (max - min) / 2.0 + min;
+    float sigma = (max - min) / 6.0;
+    std::normal_distribution<double> distribution(mu, sigma);
+
+    double number = distribution(generator);
+    if (number > max) {number = max;}
+    else if (number < min) {number = min;}
+    else {;}
+
+    c_ = number;
+    /* end */
+
     d_ = D_;
     r_ = T_;
     cnt_++;
-    
+
     release_time_cnt = kernel_cnt;
-    
+
 }
 
 void Task::on_task_start(void) {
     //mexPrintf("Task %d started \r", id_);
-    
+
     start_time_cnt = kernel_cnt;
-    
+
     if (onstart_hook_ != NULL) {
         onstart_hook_();
     }
-    
+
 }
 
 void Task::on_task_finish(void) {
     //mexPrintf("Task %d finished \r", id_);
-    
+
     finish_time_cnt = kernel_cnt;
-    
+
+    /* record BCRT and WCRT */
+    int response_time = finish_time_cnt - release_time_cnt;
+
+    if (response_time > WCRT_) {
+        WCRT_ = response_time;
+    }
+
+    if (response_time < BCRT_) {
+        BCRT_ = response_time;
+    }
+
     if (onfinish_hook_ != NULL) {
         onfinish_hook_();
     }

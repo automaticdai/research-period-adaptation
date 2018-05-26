@@ -119,6 +119,7 @@ void afbs_initilize(enum_scheduling_policy sp)
 
 void afbs_create_task(CTask t, callback task_main, callback on_start, callback on_finish)
 {
+
     if (t.T_ == 0) {
         #ifdef AFBS_WARNING_ON
             mexPrintf("Error: Task period cannot be 0!\r");
@@ -298,7 +299,7 @@ double analysis_steady_state_time(void) {
     for (i = 0; i < y_idx; i++) {
         // find when the system enters steady-state
         // 0.2 is steady-state error
-        if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001) 
+        if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001)
            || (y_trace[i] < ref_last - 0.02 * ref_last - 0.001)) {
             tss_idx = i;
         }
@@ -306,7 +307,7 @@ double analysis_steady_state_time(void) {
 
     cost_ISE = 0;
     cost_IAE = 0;
-    
+
     if (ref_diff == 0) {
         /* first operation, no ref_diff */
         ;
@@ -314,19 +315,22 @@ double analysis_steady_state_time(void) {
         for (i = 0; i < tss_idx; i++) {
             cost_ISE += ((y_trace[i] - ref_last) / abs(ref_diff))
                  * ((y_trace[i] - ref_last) / abs(ref_diff)) * KERNEL_TICK_TIME;
-            
+
             cost_IAE += abs(y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
         }
     }
+
     return double(tss_idx) * KERNEL_TICK_TIME;
+
 }
 
 
 void afbs_performance_monitor(void) {
     double C = 3.9528;
-    
+
     double x1 = 0;
     double x2 = 0;
+
     // evaluate system performance
     x1 = afbs_state_in_load(0);
     x2 = afbs_state_in_load(1);
@@ -345,9 +349,9 @@ void afbs_performance_monitor(void) {
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         tss = analysis_steady_state_time();
-        mexPrintf("%f, %f, %f, %f, 0 \r", afbs_get_current_time(), tss, cost_ISE, cost_IAE);
+        mexPrintf("%f, %f, %f, %f, %d, %d \r", afbs_get_current_time(), tss, cost_ISE, cost_IAE, TCB[5].BCRT_, TCB[5].WCRT_);
 
-        /* Policy 1 */
+        /* Naive Feedback: Policy 1 */
         /*
         if (abs(tss - tss_target) < 0.05) {
             // hold, no action;
@@ -362,7 +366,7 @@ void afbs_performance_monitor(void) {
         */
         // end of policy
 
-        /* Policy 2 */
+        /* Naive Feedback: Policy 2 */
         /*
         pi_trace[pi_idx] = tss;
         pi_idx += 1;

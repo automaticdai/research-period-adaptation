@@ -39,6 +39,7 @@ static void mdlCheckParameters(SimStruct *S)
 #endif /* MDL_CHECK_PARAMETERS */
 
 
+
 /* Function: mdlInitializeSizes ===============================================
  * Abstract:
  *    The sizes information is used by Simulink to determine the S-function
@@ -108,8 +109,8 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetOptions(S, (SS_OPTION_EXCEPTION_FREE_CODE |
                      SS_OPTION_PORT_SAMPLE_TIMES_ASSIGNED));
 
-     /* print logs */
-     /*
+    /* print logs */
+    /*
  	mexPrintf("---------------------------------------------- \r");
  	mexPrintf("| AFBS-Kernel v1.0                           | \r");
  	mexPrintf("| by Xiaotian Dai                            | \r");
@@ -120,10 +121,11 @@ static void mdlInitializeSizes(SimStruct *S)
     /* initialize kernel */
     afbs_initilize(fps);
 
-    /* create task list */
-    task_init();
+    /* initialize user application */
+    app_init();
 
 } /* end mdlInitializeSizes */
+
 
 
 /* Function: mdlInitializeSampleTimes =========================================
@@ -150,6 +152,7 @@ static void mdlInitializeConditions(SimStruct *S)
 {
 
 } /* end mdlInitializeConditions */
+
 
 
 /* Function: mdlOutputs =======================================================
