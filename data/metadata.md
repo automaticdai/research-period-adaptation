@@ -1,15 +1,13 @@
-
-
-
 # Metadata
-
 ## dataset_a
+- no noise
+- $ c_i = C_i $
+
+
 
 ### System model (stable)
 
-`zpk([], [-10 + 10j, -10 - 10j], 100) `
-
-
+- `zpk([], [-10 + 10j, -10 - 10j], 100)`
 
 ### Taskset (task number = 5, total utilization 0.6873)
 
@@ -24,49 +22,33 @@ int task_config[TASK_NUMBERS][5] = {
 };
 ```
 
-
-
 ### Folder Structure
 
-- afbs_log
-- afbs_pi
-- afbs_ri
-- mc_pi_uniform
-- mc_pi_ecdf
-
+- \afbs_log
+- \afbs_pi
+- \afbs_ri
+- \mc_pi_uniform
+- \mc_pi_ecdf
 
 
 ## dataset_b
+- bandwidth limited noise: 1e-6, sampling time: 0.01
+- $ c_i = \mathcal{N}((C_i - C_i/2) / 2, (C_i - C_i/2) / 3 ) $
+- reference is random generated: value range [1, 5], time interval [1.0, 2.0]
 
-System model (unstable):
+### System model:
+- `zpk([], [-10 + 10j, -10 - 10j], 100)`
 
-`zpk([], [10 + 10j, 10 - 10j], 100) `
 
-Taskset (UUnifast, task number = 10, total utilization 0.6):
-
+### Taskset (UUnifast, task number = 5, total utilization 0.6921):
 ```c
 int task_config[TASK_NUMBERS][5] = {
-{0,    5,  131,  0, 0},
-{1,   16,  145,  0, 0},
-{2,    9,  188,  0, 0},
-{3,   18,  315,  0, 0},
-{4,    1,  442,  0, 0},
-{5,    7,  451,  0, 0},
-{6,    7,  478,  0, 0},
-{7,  104,  512,  0, 0},
-{8,   24,  568,  0, 0},
-{9,   43,  911,  0, 0},
-{10, 100, 1000,  0, 0},
+{0,   42,   157, 0, 0},
+{1,   10,   215, 0, 0},
+{2,   53,   499, 0, 0},
+{3,   87,   777, 0, 0},
+{4,   48,   801, 0, 0},
+{5,  100,  1000, 0, 0},
 };
 ```
-
-
-
-## dataset_3
-
-
-
-
-
-
 
