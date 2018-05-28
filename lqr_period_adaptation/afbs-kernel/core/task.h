@@ -18,12 +18,14 @@ public:
     int T_;
     int R_;
 
-    int c_;     // computation time countdown
-    int d_;     // deadline countdown
-    int r_;     // next release countdown
-    int cnt_;   // release count
+    int C_this_;    // computation time of this release (because it is random)
+    
+    int c_;         // computation time countdown
+    int d_;         // deadline countdown
+    int r_;         // next release countdown
+    int cnt_;       // release count
 
-    int type_;  // task type: periodic, sporadic, run_once
+    int type_;      // task type: periodic, sporadic, run_once (not yet used)
 
     /* variables used for calc response time */
     long release_time_cnt;

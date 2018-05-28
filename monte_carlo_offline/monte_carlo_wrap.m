@@ -6,12 +6,11 @@
 
 % for reproducibility
 rng default
-%rng(100)
-
+    
 %% Configurations
 % define task model
 %tau = 5; plant.sys = tf([10],[tau 1]);
-plant.sys = zpk([],[-10+10j -10-10j],100);
+plant.sys = zpk([], [-10+10j -10-10j], 100);
 plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
 plant.bwcl = bandwidth(feedback(plant.sys, 1));
@@ -47,29 +46,14 @@ task.T_L = 0.2 / plant.bwcl;
 task.T = 1000;                 % task designed period (in kernel time)
 task.C = 100;                  % task WCET (in kernel time)
 
-% define task set
-taskset = [taskset; size(taskset,1), task.C, task.T, task.T];
-
-% RTA to get BCRT and WCRT  
-[bcrt, wcrt] = rta(taskset);
-
-bcrt_a = bcrt .* kernel_time;
-wcrt_a = wcrt .* kernel_time;
-
-task.runtime.bcrt = bcrt_a(end);
-task.runtime.wcrt = wcrt_a(end);
-
-assert(task.runtime.wcrt <= task.T_L)
-assert(task.runtime.wcrt >= task.runtime.bcrt)
-
 
 %% Simulation parameters
-conf.simu_times = 3000;
-conf.simu_time_max = 0.5;
+conf.simu_times = 1000;
+conf.simu_time_max = 1.0;
 conf.simu_samplingtime = 1 * 10^-4;
 
-conf.period_min = 0.010;
-conf.period_max = 0.025;
+conf.period_min  = 0.010;
+conf.period_max  = 0.050;
 conf.period_step = 0.001;
 
 conf.sync_mode = 1;       % sync of the first release job, 0: full, 1: not sync, 2: worst-case
@@ -81,13 +65,29 @@ if (conf.sampling_method == 3)
     task.runtime.ri = ri;
 end
 
-conf.noise_on = 0;
-conf.noise_level = -20;
+conf.noise_on = 1;
+conf.noise_level = -40;
+
+addpath('D:\Projects\git\period-adaptation\data\dataset_b\logs')
 
 
 %% Run Simulation
-for period = 0.010:0.001:0.025 %task.T_L:0.001:task.T_U
+for period = 0.010:0.001:0.050 % task.T_L:0.001:task.T_U
+
+    disp(period)
     task.T = period;
+    
+    % load BCRT and WCRT
+    filename = ['pi_afbs_' num2str(period * 1e5)];
+    load(filename)
+    
+    task.runtime.bcrt = pi.bcrt(end) / 1e5;
+    task.runtime.wcrt = pi.wcrt(end) / 1e5;
+
+    %disp(task.runtime.bcrt)
+    %disp(task.runtime.wcrt)
+    
+    clear pi;
     
     % performance indices
     pi.T = [];

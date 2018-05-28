@@ -25,12 +25,12 @@ void Task::on_task_ready(void) {
     std::normal_distribution<double> distribution(mu, sigma);
 
     double number = distribution(generator);
-    if (number > max) {number = max;}
-    else if (number < min) {number = min;}
-    else {;}
-
-    c_ = number;
+    if (number > max) {c_ = max;}
+    else if (number < min) {c_ = min;}
+    else {c_ = (int)number;}
     /* end */
+
+    C_this_ = c_;
 
     d_ = D_;
     r_ = T_;

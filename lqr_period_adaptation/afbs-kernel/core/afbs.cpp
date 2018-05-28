@@ -182,7 +182,7 @@ void afbs_update(void)
 {
     for (int i = 0; i < TASK_MAX_NUM; i++) {
         if (TCB[i].status_ != deleted) {
-            if (TCB[i].r_-- == 0) {
+            if (TCB[i].status_ != ready && TCB[i].r_-- == 0) {
                 // check if a task missed its deadline
                 if (TCB[i].c_ != 0) {
                     TCB[i].on_task_missed_deadline();
@@ -206,12 +206,12 @@ void afbs_update(void)
     }
 }
 
-void  afbs_schedule(void) {
+void  afbs_schedule(void)
+{
     int task_to_be_scheduled = IDLE_TASK_IDX;
 
     // find the next task to run
-    for (int i = 0; i < TASK_MAX_NUM; i++)
-    {
+    for (int i = 0; i < TASK_MAX_NUM; i++) {
         if ((TCB[i].status_ == ready) || (TCB[i].status_ == pending)) {
             task_to_be_scheduled = i;
             break;
@@ -229,7 +229,7 @@ void  afbs_schedule(void) {
 
     // run task scheduled hook
     if ((task_to_be_scheduled != IDLE_TASK_IDX) &&
-       (TCB[task_to_be_scheduled].c_ == TCB[task_to_be_scheduled].C_)) {
+       (TCB[task_to_be_scheduled].c_ == TCB[task_to_be_scheduled].C_this_)) {
         TCB[task_to_be_scheduled].on_task_start();
         #ifdef AFBS_DEBUG_ON
             mexPrintf("[%0.4f] Task %d started! \r", afbs_get_current_time(), task_to_be_scheduled);
@@ -240,7 +240,8 @@ void  afbs_schedule(void) {
     tcb_running_id = task_to_be_scheduled;
 }
 
-void afbs_run(void) {
+void afbs_run(void)
+{
     if (tcb_running_id != IDLE_TASK_IDX) {
         #ifdef AFBS_DEBUG_ON
             mexPrintf("[%0.4f] Running Task %d\r", afbs_get_current_time(), tcb_running_id);
@@ -292,13 +293,13 @@ double tss_target = 0.28;
 double cost_ISE = 0;
 double cost_IAE = 0;
 
-double analysis_steady_state_time(void) {
+double analysis_steady_state_time(void)
+{
     int i = 0;
     int tss_idx = 0;
 
     for (i = 0; i < y_idx; i++) {
         // find when the system enters steady-state
-        // 0.2 is steady-state error
         if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001)
            || (y_trace[i] < ref_last - 0.02 * ref_last - 0.001)) {
             tss_idx = i;
@@ -325,7 +326,8 @@ double analysis_steady_state_time(void) {
 }
 
 
-void afbs_performance_monitor(void) {
+void afbs_performance_monitor(void)
+{
     double C = 3.9528;
 
     double x1 = 0;
@@ -403,7 +405,8 @@ void afbs_performance_monitor(void) {
 }
 
 
-long afbs_report_task_last_response_time(int task_id) {
+long afbs_report_task_last_response_time(int task_id)
+{
     return TCB[task_id].finish_time_cnt - TCB[task_id].release_time_cnt;
 }
 /*- EOF ----------------------------------------------------------------------*/
