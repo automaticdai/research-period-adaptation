@@ -4,21 +4,21 @@
 % Xiaotian Dai
 % University of York
 % -------------------------------------------------------------------------
-% Example of a single experiment. Used data are pre-calculated.
+% Offline run of the method. Used data are pre-calculated.
 % -------------------------------------------------------------------------
 
-addpath('D:\Projects\git\period-adaptation\data\dataset_b\logs')
-addpath('D:\Projects\git\period-adaptation\data\dataset_b\mc')
+addpath('..\data\dataset_b\afbs')
+addpath('..\data\dataset_b\mc')
 
 
 %% experiment configurations
 % framework parameters
 fw.conf.ph = 1;                       % prediction horizon
-fw.conf.init_period = 1000;           % initial task period is 10 ms
+fw.conf.init_period = 1500;           % initial task period is 15 ms
 fw.conf.step_size = 100;              % period change step in 1 ms
 
-fw.conf.alphad = 0.20;                % degradation factor
-fw.conf.ci = 0.99;                    % decision confidence interval
+fw.conf.alphad = 0.175;               % degradation factor
+fw.conf.ci = 0.90;                    % decision confidence interval
 fw.conf.retry_times = 0;              % retry times
 
 % Configuration File
@@ -28,7 +28,10 @@ fw.conf.retry_times = 0;              % retry times
 % mc configuration: conf
 
 % traces
-%fw.iteration
+fw.traces.period = [];
+fw.traces.pip  = [];
+fw.traces.pip_mc = [];
+fw.traces.bias = [];
 
 
 %% algorithm starts here
@@ -87,6 +90,30 @@ while (true)
         end
     end
     
+    % record traces
+    fw.traces.bias =[fw.traces.bias fw.bias];
+    fw.traces.period = [fw.traces.period; fw.period * 10];
+    
+    pip_this = 1 - (fw.j_expected - fw.j0) / fw.j_expected;
+    fw.traces.pip = [fw.traces.pip; pip_this];
+    
+    pip_mc_this = 1 - (fw.j_actual - fw.j0) / fw.j_actual;
+    fw.traces.pip_mc = [fw.traces.pip_mc; pip_mc_this];
+
     fw.iteration = fw.iteration + 1;
     
 end
+
+% plot trace
+subplot(2,1,1)
+plot(fw.traces.period, fw.traces.pip, 'r^-');
+hold on;
+plot(fw.traces.period, fw.traces.pip_mc, 'bx-');
+
+xlabel('T_i')
+ylabel('PI')
+legend(['Observed'], ['Predicted'])
+
+subplot(2,1,2)
+plot(fw.traces.period, fw.traces.bias, 'o-');
+legend(['bias'])
