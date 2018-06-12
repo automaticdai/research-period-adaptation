@@ -277,58 +277,105 @@ int    t_period = 100;
 
 double ref_last = 0;
 double ref_this = 0;
-double ref_diff = 0; // difference between references, used to normalize PI
+double ref_diff = 0; // difference between two references, used to normalize PI
 
-#define TRACE_BUFFER_SIZE   (1000000L)
+#define TRACE_BUFFER_SIZE   (1000000L)  // tracking buffer size
 int    y_idx = 0;
 double y_trace[TRACE_BUFFER_SIZE];
 
+/*
 #define TRACE_PI_SIZE       (100)
 int    pi_idx = 0;
 double pi_trace[TRACE_PI_SIZE];
+*/
 
-double tss = -1;
-double tss_target = 0.28;
+/* control performance metrics */
+double tss = 0;      // steady state time
+double cost_ISE = 0; // intergrated squared error
+double cost_IAE = 0; // intergrated absolute error
+double mp = 0;       // % overshoot
+double tp = 0;       // peak time
 
-double cost_ISE = 0;
-double cost_IAE = 0;
+/*
+FUNCTION: analysis_control_performance()
 
-double analysis_steady_state_time(void)
+DESCRIPTION:
+Analysis the performance in time domain of a control output sequence.
+
+INPUTS:
+<global> double y_trace[]
+<global> ref_last
+
+OUTPUTS:
+<global >double tss: steady state time
+<global> double cost_ISE
+<global> double cost_IAE
+<global> double mp: % overshoot
+<global> double tp: peak time
+*/
+void analysis_control_performance(void)
 {
-    int i = 0;
     int tss_idx = 0;
+    int tp_idx = 0;
+    double y_max = 0;
 
-    for (i = 0; i < y_idx; i++) {
-        // find when the system enters steady-state
+    /* a trick to make y_max right */
+    if (ref_diff < 0) {
+        y_max = 10000;
+    }
+
+    for (int i = 0; i < y_idx; i++) {
+        /* find when the system enters steady-state */
         if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001)
            || (y_trace[i] < ref_last - 0.02 * ref_last - 0.001)) {
             tss_idx = i;
         }
-    }
 
-    cost_ISE = 0;
-    cost_IAE = 0;
-
-    if (ref_diff == 0) {
-        /* first operation, no ref_diff */
-        ;
-    } else {
-        for (i = 0; i < tss_idx; i++) {
-            cost_ISE += ((y_trace[i] - ref_last) / abs(ref_diff))
-                 * ((y_trace[i] - ref_last) / abs(ref_diff)) * KERNEL_TICK_TIME;
-
-            cost_IAE += abs(y_trace[i] - ref_last) / abs(ref_diff) * KERNEL_TICK_TIME;
+        /* get the maximum/minimum value of y */
+        if (ref_diff > 0) {
+            if (y_trace[i] > y_max) {
+                y_max = y_trace[i];
+                tp_idx = i;
+            }
+        }
+        else {
+            if (y_trace[i] < y_max) {
+                y_max = y_trace[i];
+                tp_idx = i;
+            }
         }
     }
 
-    return double(tss_idx) * KERNEL_TICK_TIME;
+    /* clear PIs = 0 */
+    tss = 0;
+    cost_ISE = 0;
+    cost_IAE = 0;
+    mp = 0;
+    tp = 0;
 
+    if (ref_diff == 0) {
+        /* the first operation, no ref_diff, and no PIs*/
+        ;
+    } else {
+
+        for (int i = 0; i < tss_idx; i++) {
+            double error = y_trace[i] - ref_last;
+
+            cost_ISE += (error / abs(ref_diff)) * (error / abs(ref_diff)) * KERNEL_TICK_TIME;
+            cost_IAE += abs(error) / abs(ref_diff) * KERNEL_TICK_TIME;
+        }
+
+        mp = (y_max - ref_last) / (ref_diff);
+        tss = double(tss_idx) * KERNEL_TICK_TIME;
+        tp = double(tp_idx) * KERNEL_TICK_TIME;
+        //mexPrintf("%f, %f, %f, %f \r", y_max, mp, ref_last, ref_diff);
+    }
 }
 
 
 void afbs_performance_monitor(void)
 {
-    double C = 3.9528;
+    double C[2] = {3.9528, 0};
 
     double x1 = 0;
     double x2 = 0;
@@ -336,7 +383,7 @@ void afbs_performance_monitor(void)
     // evaluate system performance
     x1 = afbs_state_in_load(0);
     x2 = afbs_state_in_load(1);
-    y_trace[y_idx] = C * x1;
+    y_trace[y_idx] = C[0] * x1 + C[1] * x2;
 
     if (y_idx < TRACE_BUFFER_SIZE - 1) {
         y_idx += 1;
@@ -350,8 +397,9 @@ void afbs_performance_monitor(void)
 
     /* check if the reference has changed */
     if (ref_this != ref_last) {
-        tss = analysis_steady_state_time();
-        mexPrintf("%f, %f, %f, %f, %d, %d \r", afbs_get_current_time(), tss, cost_ISE, cost_IAE, TCB[5].BCRT_, TCB[5].WCRT_);
+        analysis_control_performance();
+        mexPrintf("%f, %f, %f, %f, %f, %f, %d, %d \r", afbs_get_current_time(),
+                tss, cost_ISE, cost_IAE, mp, tp, TCB[5].BCRT_, TCB[5].WCRT_);
 
         /* Naive Feedback: Policy 1 */
         /*

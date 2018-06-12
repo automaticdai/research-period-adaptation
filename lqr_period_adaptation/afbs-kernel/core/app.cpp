@@ -58,7 +58,7 @@ void task_1_start_hook(void) {
 void task_1_finish_hook(void) {
     /* LQR parameters */
     double N = 2.2978;
-    double K[] = {0.0382, 1.1390};
+    double K[] = {18.1277, 16.9504};
 
     /* Calculate Outputs */
     double u = N * ref - (K[0] * x1 + K[1] * x2);

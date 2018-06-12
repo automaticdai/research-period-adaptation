@@ -19,8 +19,8 @@
 // parameters
 float REF_LO = 1.01;
 float REF_HI = 5.99;
-float TIME_LO = 1.0;
-float TIME_HI = 2.0;
+float TIME_LO = 1.5;
+float TIME_HI = 3.0;
 
 
 // Function: mdlInitializeSizes ===============================================
