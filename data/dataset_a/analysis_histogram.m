@@ -1,4 +1,4 @@
-% Compare using result from b3 + afbs_10ms
+% Compare PIs histogram using different response time model
 
 close all;
 

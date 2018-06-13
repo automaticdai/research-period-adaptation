@@ -1,5 +1,5 @@
 
-for Ti = 1000:100:5000
+for Ti = 1500:100:4100
 	filename = ['./logs/log' num2str(Ti) '.log'];
 	csv_data_all = csvread(filename);
 
@@ -12,15 +12,18 @@ for Ti = 1000:100:5000
 	IAE_t = csv_data_all(:,4);
 	pi.IAE = IAE_t(IAE_t ~= 0);
 
-	bcrti_t = csv_data_all(:,5);
+    Mp_t = csv_data_all(:,5);
+	pi.Mp = Mp_t(Mp_t ~= 0);
+
+    Tp_t = csv_data_all(:,6);
+	pi.Tp = Tp_t(Tp_t ~= 0);
+    
+	bcrti_t = csv_data_all(:,7);
 	pi.bcrt = bcrti_t(bcrti_t ~= 0);
 
-    wcrti_t = csv_data_all(:,6);
+    wcrti_t = csv_data_all(:,8);
 	pi.wcrt = wcrti_t(wcrti_t ~= 0);
     
-	filename = ['./logs/pi_afbs_' num2str(Ti)];
+	filename = ['./afbs/pi_afbs_' num2str(Ti)];
 	save([filename '.mat'], 'pi')
-
-	%filename = ['./logs/pi_afbs_' num2str(Ti)];
-	%save([filename '.mat'], 'ri')
 end
