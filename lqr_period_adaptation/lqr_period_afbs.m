@@ -32,10 +32,13 @@ simu.sampling_time = 100 * 10^-6;    % 100 us
 %plant = tf([10],[tau 1]);
 
 % second-order system
-plant.sys = zpk([],[10+10j 10-10j],100);
+plant.sys = zpk([],[10+25j 10-25j],100);
 plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
 plant.bwcl = bandwidth(feedback(plant.sys, 1));
+
+h_min = 0.2 / plant.bwcl;
+h_max = 0.6 / plant.bwcl;
 
 A = plant.model_ss.a;
 B = plant.model_ss.b;
@@ -44,11 +47,11 @@ D = plant.model_ss.d;
 
 % plant noise model
 plant.noise_level = 1e-4;
-plant.noise_sampling_time = 1e-4;
+plant.noise_sampling_time = 1e-5;
 %plant.disturbance_on = 0;
 
 % LQR controller
-Q = 1 * eye(plant.order);
+Q = 10 * eye(plant.order);
 R = 0.1;
 N = zeros(plant.order, 1);
 

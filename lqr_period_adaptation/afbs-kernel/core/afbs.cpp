@@ -375,7 +375,7 @@ void analysis_control_performance(void)
 
 void afbs_performance_monitor(void)
 {
-    double C[2] = {3.9528, 0};
+    double C[2] = {2.5, 0};
 
     double x1 = 0;
     double x2 = 0;

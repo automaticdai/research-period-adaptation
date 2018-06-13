@@ -36,8 +36,8 @@ ctrl.u = 0;
 % Simulation inner loop
 i = 0;
 
-% control maximum simulation length
-while i < 1000
+while i < 3000
+% control maximum simulation length, but why?
     switch simu.state
         case 0
             % s0: task start

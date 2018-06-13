@@ -6,11 +6,11 @@
 
 % for reproducibility
 rng default
-    
+
 %% Configurations
 % define task model
 %tau = 5; plant.sys = tf([10],[tau 1]);
-plant.sys = zpk([], [-10+10j -10-10j], 100);
+plant.sys = zpk([],[10+25j 10-25j],100);
 plant.model_ss = ss(plant.sys);
 plant.order = order(plant.sys);
 plant.bwcl = bandwidth(feedback(plant.sys, 1));
@@ -21,7 +21,7 @@ B = plant.model_ss.b;
 C = plant.model_ss.c;
 D = plant.model_ss.d;
 
-Q = 1 * eye(plant.order);
+Q = 10 * eye(plant.order);
 R = 0.1;
 N = zeros(plant.order, 1);
 
@@ -48,31 +48,33 @@ task.C = 100;                  % task WCET (in kernel time)
 
 
 %% Simulation parameters
+% path to afbs source data
+addpath('E:\Workstation\Git\period-adaptation\data\dataset_c\afbs')
+
+% simulation times
 conf.simu_times = 1000;
-conf.simu_time_max = 1.0;
+conf.simu_time_max = 3.0;
 conf.simu_samplingtime = 1 * 10^-4;
 
+conf.noise_on = 1;
+conf.noise_level = -40;
+
 conf.period_min  = 0.010;
-conf.period_max  = 0.050;
+conf.period_max  = 0.014;
 conf.period_step = 0.001;
 
 conf.sync_mode = 1;       % sync of the first release job, 0: full, 1: not sync, 2: worst-case
 conf.sampling_method = 1; % response time: 1: uniform, 2: norm, 3: empirical
 
+% load Ri distribution profile, if samlping method is empirical
 if (conf.sampling_method == 3)
-    % load Ri distribution profile
     load('ri_afbs_10ms')
     task.runtime.ri = ri;
 end
 
-conf.noise_on = 1;
-conf.noise_level = -40;
-
-addpath('D:\Projects\git\period-adaptation\data\dataset_b\logs')
-
 
 %% Run Simulation
-for period = 0.010:0.001:0.050 % task.T_L:0.001:task.T_U
+for period = conf.period_min:conf.period_step:conf.period_max % task.T_L:0.001:task.T_U
 
     disp(period)
     task.T = period;
