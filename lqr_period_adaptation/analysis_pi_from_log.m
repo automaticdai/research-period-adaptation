@@ -1,7 +1,7 @@
 % Read PI data from command output of afbs kernel
 
 %% read data from log file
-filename = 'log.txt';
+filename = './logs/log4000.txt';
 delimiterIn = ',';
 headerlinesIn = 1;
 A = importdata(filename,delimiterIn,headerlinesIn);

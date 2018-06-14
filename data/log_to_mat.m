@@ -1,6 +1,8 @@
 
-for Ti = 1500:100:4100
-	filename = ['./logs/log' num2str(Ti) '.log'];
+dataset_path = ['./dataset_d'];
+
+for Ti = 1000:100:4100
+	filename = [dataset_path '/logs/log' num2str(Ti) '.log'];
 	csv_data_all = csvread(filename);
 
 	Tss_t = csv_data_all(:,2);
@@ -24,6 +26,6 @@ for Ti = 1500:100:4100
     wcrti_t = csv_data_all(:,8);
 	pi.wcrt = wcrti_t(wcrti_t ~= 0);
     
-	filename = ['./afbs/pi_afbs_' num2str(Ti)];
+	filename = [dataset_path '/afbs/pi_afbs_' num2str(Ti)];
 	save([filename '.mat'], 'pi')
 end
