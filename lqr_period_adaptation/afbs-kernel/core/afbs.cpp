@@ -345,8 +345,8 @@ void analysis_control_performance(void)
 
     for (int i = 0; i < y_idx; i++) {
         /* find when the system enters steady-state */
-        if ((y_trace[i] > ref_last + 0.02 * ref_last + 0.001)
-           || (y_trace[i] < ref_last - 0.02 * ref_last - 0.001)) {
+        if ((y_trace[i] > y_final + 0.05 * abs(ref_diff) + 0.001)
+           || (y_trace[i] < y_final - 0.05 * abs(ref_diff) - 0.001)) {
             tss_idx = i;
         }
 
