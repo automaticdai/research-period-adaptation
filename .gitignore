@@ -1,6 +1,6 @@
 # MATLAB/simulink temporary output
 **/slprj/
-*.mexw64
+*.mexw64.pdb
 *.autosave
 
 # Data

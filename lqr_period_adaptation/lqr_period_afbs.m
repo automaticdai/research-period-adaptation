@@ -16,6 +16,7 @@ addpath('./toolbox/')
 cd('afbs-kernel')
 mex -g ./core/kernel.cpp ./core/afbs.cpp ./core/app.cpp ./core/utils.cpp ./core/task.cpp
 mex -g ./sfun_reference_cpp.cpp
+clear mex
 cd('..')
 
 
@@ -46,7 +47,7 @@ C = plant.model_ss.c;
 D = plant.model_ss.d;
 
 % modelling error
-Aac = A - 0.05 * [1 0; 0 1];
+Aac = A - 0.00 * [10 0; 0 10];
 Bac = B;
 Cac = C;
 
