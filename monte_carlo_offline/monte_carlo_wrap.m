@@ -7,6 +7,10 @@
 % for reproducibility
 rng default
 
+% path to dataset source
+addpath('E:\Workstation\Git\period-adaptation\data\dataset_c\afbs')
+
+
 %% Configurations
 % define task model
 %tau = 5; plant.sys = tf([10],[tau 1]);
@@ -48,9 +52,6 @@ task.C = 100;                  % task WCET (in kernel time)
 
 
 %% Simulation parameters
-% path to afbs source data
-addpath('E:\Workstation\Git\period-adaptation\data\dataset_c\afbs')
-
 % simulation times
 conf.simu_times = 1000;
 conf.simu_time_max = 3.0;
@@ -59,7 +60,7 @@ conf.simu_samplingtime = 1 * 10^-4;
 conf.noise_on = 1;
 conf.noise_level = -40;
 
-conf.period_min  = 0.010;
+conf.period_min  = 0.013;
 conf.period_max  = 0.014;
 conf.period_step = 0.001;
 

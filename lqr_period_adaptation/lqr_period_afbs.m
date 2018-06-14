@@ -45,6 +45,11 @@ B = plant.model_ss.b;
 C = plant.model_ss.c;
 D = plant.model_ss.d;
 
+% modelling error
+Aac = A - 0.05 * [1 0; 0 1];
+Bac = B;
+Cac = C;
+
 % plant noise model
 plant.noise_level = 1e-4;
 plant.noise_sampling_time = 1e-5;

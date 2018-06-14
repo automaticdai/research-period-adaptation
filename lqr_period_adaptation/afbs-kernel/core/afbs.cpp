@@ -240,6 +240,9 @@ void  afbs_schedule(void)
     tcb_running_id = task_to_be_scheduled;
 }
 
+
+#define MONITOR_REFILL_CNT     (0.001 / KERNEL_TICK_TIME)
+int gi_monitor_cnt = 0;
 void afbs_run(void)
 {
     if (tcb_running_id != IDLE_TASK_IDX) {
@@ -261,7 +264,13 @@ void afbs_run(void)
     }
 
     /* run monitor */
-    afbs_performance_monitor();
+    if (gi_monitor_cnt <= 0) {
+        gi_monitor_cnt = MONITOR_REFILL_CNT - 1;
+        afbs_performance_monitor();
+    }
+    else {
+        gi_monitor_cnt--;
+    }
 }
 
 void afbs_idle(void)
@@ -279,7 +288,7 @@ double ref_last = 0;
 double ref_this = 0;
 double ref_diff = 0; // difference between two references, used to normalize PI
 
-#define TRACE_BUFFER_SIZE   (1000000L)  // tracking buffer size
+#define TRACE_BUFFER_SIZE   (10000L)  // tracking buffer size
 int    y_idx = 0;
 double y_trace[TRACE_BUFFER_SIZE];
 
@@ -318,11 +327,21 @@ void analysis_control_performance(void)
     int tss_idx = 0;
     int tp_idx = 0;
     double y_max = 0;
+    double y_final = 0;
 
-    /* a trick to make y_max right */
+    /* a trick to make y_max right when ref_diff < 0 */
     if (ref_diff < 0) {
         y_max = 10000;
     }
+
+    /* get the final y value for calculating overshoot */
+    double y_sum  = 0;
+    int sum_counts = 20;
+    for (int i = 1; i <= sum_counts; i++) {
+        y_sum += y_trace[y_idx - i];
+    }
+    y_final = y_sum / sum_counts;
+
 
     for (int i = 0; i < y_idx; i++) {
         /* find when the system enters steady-state */
@@ -361,14 +380,15 @@ void analysis_control_performance(void)
         for (int i = 0; i < tss_idx; i++) {
             double error = y_trace[i] - ref_last;
 
-            cost_ISE += (error / abs(ref_diff)) * (error / abs(ref_diff)) * KERNEL_TICK_TIME;
-            cost_IAE += abs(error) / abs(ref_diff) * KERNEL_TICK_TIME;
+            cost_ISE += (error / abs(ref_diff)) * (error / abs(ref_diff)) * KERNEL_TICK_TIME * MONITOR_REFILL_CNT;
+            cost_IAE += abs(error) / abs(ref_diff) * KERNEL_TICK_TIME * MONITOR_REFILL_CNT;
         }
 
-        mp = (y_max - ref_last) / (ref_diff);
-        tss = double(tss_idx) * KERNEL_TICK_TIME;
-        tp = double(tp_idx) * KERNEL_TICK_TIME;
-        //mexPrintf("%f, %f, %f, %f \r", y_max, mp, ref_last, ref_diff);
+        mp = (y_max - y_final) / (ref_diff);
+        tss = double(tss_idx) * KERNEL_TICK_TIME * MONITOR_REFILL_CNT;
+        tp = double(tp_idx) * KERNEL_TICK_TIME * MONITOR_REFILL_CNT;
+
+        //mexPrintf("%d, %f, %f, %f, %f, %f \r", y_idx, y_final, y_max, mp, ref_last, ref_diff);
     }
 }
 
@@ -398,7 +418,7 @@ void afbs_performance_monitor(void)
     /* check if the reference has changed */
     if (ref_this != ref_last) {
         analysis_control_performance();
-        mexPrintf("%f, %f, %f, %f, %f, %f, %d, %d \r", afbs_get_current_time(),
+        mexPrintf("%0.3f, %f, %f, %f, %f, %f, %d, %d \r", afbs_get_current_time(),
                 tss, cost_ISE, cost_IAE, mp, tp, TCB[5].BCRT_, TCB[5].WCRT_);
 
         /* Naive Feedback: Policy 1 */
