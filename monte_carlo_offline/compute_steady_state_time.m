@@ -12,12 +12,10 @@ ref_lower = ref - tolerance_prec;
 ref_upper = ref + tolerance_prec;
 
 idx = ((y > ref_lower) & (y < ref_upper));
-Ts_idx = find(~idx, 1, 'last') + 1;
+Ts_idx = find(~idx, 1, 'last');
 
 if (isempty(Ts_idx))
     Ts = 0;
-elseif (Ts_idx > numel(y))
-    Ts = NaN;
 else
     Ts = t(Ts_idx) - t(1);
 end

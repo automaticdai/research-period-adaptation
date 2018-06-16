@@ -1,7 +1,7 @@
 
 dataset_path = ['./dataset_d'];
 
-for Ti = 1000:100:4100
+for Ti = 1000:100:4000
 	filename = [dataset_path '/logs/log' num2str(Ti) '.log'];
 	csv_data_all = csvread(filename);
 

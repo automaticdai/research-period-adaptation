@@ -8,7 +8,7 @@
 rng default
 
 % path to dataset source
-addpath('E:\Workstation\Git\period-adaptation\data\dataset_c\afbs')
+addpath('E:\Workstation\Git\period-adaptation\data\dataset_d\afbs')
 
 
 %% Configurations
@@ -58,10 +58,11 @@ conf.simu_time_max = 3.0;
 conf.simu_samplingtime = 1 * 10^-4;
 
 conf.noise_on = 1;
-conf.noise_level = -40;
+conf.noise_level = 10;
+conf.noise_level_snr = 10;
 
-conf.period_min  = 0.013;
-conf.period_max  = 0.014;
+conf.period_min  = 0.037;
+conf.period_max  = 0.040;
 conf.period_step = 0.001;
 
 conf.sync_mode = 1;       % sync of the first release job, 0: full, 1: not sync, 2: worst-case

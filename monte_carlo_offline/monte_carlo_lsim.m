@@ -102,7 +102,9 @@ while i < 3000
 
             t = 0:conf.simu_samplingtime:simu.tf;
             noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
-            u = ones(numel(t), 1) * ctrl.u  + noises;
+            u = ones(numel(t), 1) * ctrl.u;
+            u = awgn(u, conf.noise_level_snr, 'measured');
+            
             x0 = simu.x(end, 1:plant.order)';
 
             if numel(t) > 1
@@ -127,7 +129,10 @@ while i < 3000
             % s3 -> s1
             t = 0:conf.simu_samplingtime:simu.tr;
             noises = wgn(numel(t), 1, conf.noise_level) * conf.noise_on;
-            u = ones(numel(t), 1) * ctrl.u + noises;
+            
+            u = ones(numel(t), 1) * ctrl.u;
+            u = awgn(u, conf.noise_level_snr, 'measured');
+            
             x0 = simu.x(end, 1:plant.order)';
 
             if numel(t) > 1
@@ -177,7 +182,7 @@ end
 
 
 % analysis
-[simu.tss, tss_idx] = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.02);
+[simu.tss, tss_idx] = compute_steady_state_time(simu.y, simu.t, ctrl.ref, 0.05);
 simu.cost = compute_quadratic_control_cost(simu.x(1:tss_idx, :), simu.u(1:tss_idx), conf.simu_samplingtime, Q, N, R);
 simu.cost_ise = compute_ise_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
 simu.cost_iae = compute_iae_control_cost(ctrl.ref - simu.y(1:tss_idx), conf.simu_samplingtime);
