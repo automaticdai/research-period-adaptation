@@ -47,7 +47,7 @@ C = plant.model_ss.c;
 D = plant.model_ss.d;
 
 % modelling error
-Aac = A - 0.00 * [10 0; 0 10];
+Aac = A + 0.00 * [10 0; 0 10];
 Bac = B;
 Cac = C;
 

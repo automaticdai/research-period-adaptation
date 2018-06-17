@@ -90,8 +90,33 @@ int task_config[TASK_NUMBERS][5] = {
 
 
 ## dataset_d2
-- modelling_error = 5%
+- modelling_error = -5%, normal
+
 
 ## dataset_d3
-- modelling_error = - 5%
+- modelling_error = +5%, normal
+
+
+## dataset_d4
+- perfect model, BCET
+
+
+## dataset_d5
+- modelling_error = -5%, BCET
+
+
+## dataset_d6
+- modelling_error = +5%, BCET
+
+
+## dataset_d7
+- perfect model, WCET
+
+
+## dataset_d8
+- modelling_error = -5%, WCET
+
+
+## dataset_d9
+- modelling_error = +5%, WCET
 
