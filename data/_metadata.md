@@ -92,5 +92,6 @@ int task_config[TASK_NUMBERS][5] = {
 ## dataset_d2
 - modelling_error = 5%
 
-
+## dataset_d3
+- modelling_error = - 5%
 
