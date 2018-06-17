@@ -1,6 +1,7 @@
 % compare prediction with actual observations
 
-dataset_path = ['./dataset_d'];
+dataset_mc_path = ['./dataset_d'];
+dataset_path = ['./dataset_d5'];
 
 close all;
 
@@ -41,7 +42,7 @@ for i = periods
     x_a_afbs = [x_a_afbs; i/100 * ones(numel(pi.IAE), 1)];
     
     % predictions
-    filename = [dataset_path '/mc/pi_mc_uniform_' num2str(i / 100) 'ms'];
+    filename = [dataset_mc_path '/mc/pi_mc_uniform_' num2str(i / 100) 'ms'];
     load(filename)
     
     iae_a = [iae_a;pi.IAE'];

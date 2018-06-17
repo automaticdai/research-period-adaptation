@@ -83,8 +83,8 @@ int task_config[TASK_NUMBERS][5] = {
 
 
 
-
 ## dataset_d (inherite from dataset_c)
+- baseline
 - monitoring interval = 1ms 
 - y_final used for calculating steady-state
 
@@ -98,25 +98,9 @@ int task_config[TASK_NUMBERS][5] = {
 
 
 ## dataset_d4
-- perfect model, BCET
-
-
-## dataset_d5
-- modelling_error = -5%, BCET
-
-
-## dataset_d6
-- modelling_error = +5%, BCET
-
-
-## dataset_d7
 - perfect model, WCET
 
 
-## dataset_d8
-- modelling_error = -5%, WCET
-
-
-## dataset_d9
+## dataset_d5
 - modelling_error = +5%, WCET
 
