@@ -7,14 +7,14 @@
 % Offline run of the method. Used data are pre-calculated.
 % -------------------------------------------------------------------------
 
-addpath('..\data\dataset_b\afbs')
-addpath('..\data\dataset_b\mc')
+addpath('..\data\dataset_d7\afbs')
+addpath('..\data\dataset_d7\mc')
 
 
 %% experiment configurations
 % framework parameters
 fw.conf.ph = 1;                       % prediction horizon
-fw.conf.init_period = 1500;           % initial task period is 15 ms
+fw.conf.init_period = 1000;           % initial task period is 15 ms
 fw.conf.step_size = 100;              % period change step in 1 ms
 
 fw.conf.alphad = 0.175;               % degradation factor

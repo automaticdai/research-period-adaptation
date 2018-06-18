@@ -1,7 +1,7 @@
 % compare prediction with actual observations
 
 dataset_mc_path = ['./dataset_d'];
-dataset_path = ['./dataset_d5'];
+dataset_path = ['./dataset_d'];
 
 close all;
 
@@ -36,7 +36,7 @@ for i = periods
     tp_a = [tp_a;(pi.Tp)];
     wcrt_a = [wcrt_a; max(pi.wcrt)];
     
-    j_max_a = [j_max_a; max(iae_a)];
+    j_max_a = [j_max_a; max(pi.IAE)];
     
     x_a = [x_a; i/100 * ones(numel(pi.IAE), 1)];
     x_a_afbs = [x_a_afbs; i/100 * ones(numel(pi.IAE), 1)];
