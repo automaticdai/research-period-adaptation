@@ -89,18 +89,13 @@ int task_config[TASK_NUMBERS][5] = {
 - y_final used for calculating steady-state
 
 
-## dataset_d2
-- modelling_error = -5%, normal
 
+Experiment Datasets:
 
-## dataset_d3
-- modelling_error = +5%, normal
-
-
-## dataset_d4
-- perfect model, WCET
-
-
-## dataset_d5
-- modelling_error = +5%, WCET
-
+- d1, Ideal, Normal
+- d2, -5%, Normal
+- d3, +5%, Normal
+- d4, Ideal, WCET
+- d5, +5%, WCET
+- d6, Ideal, BCET
+- d7, -5%, BCET

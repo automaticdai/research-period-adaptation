@@ -1,20 +1,25 @@
 
-
-
-for i = 2:7
+for i = 1:7
     filename = ['d' num2str(i)];
     load(filename)
     
-	subplot(3,2,i - 1)
+    if (i > 4)
+        j = i + 0.5;
+    else
+        j = i;
+    end
     
-    plot(fw_traces.period, fw_traces.pip, 'r^-');
+	subplot(2,4,j)
+    
+    plot(fw_traces.period / 1000, fw_traces.pip, 'r^-');
     hold on;
-    plot(fw_traces.period, fw_traces.pip_mc, 'bx-');
+    plot(fw_traces.period / 1000, fw_traces.pip_mc, 'bx-');
 
     title(['E_' num2str(i)])
-    xlabel('Period')
+    xlabel('Period (ms)')
     ylabel('PI')
     
-    ylim([0.5 1.05])
+    xlim([10 30])
+    ylim([0.5 1.02])
 
 end
