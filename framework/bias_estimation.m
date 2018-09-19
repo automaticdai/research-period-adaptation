@@ -3,10 +3,17 @@ function [bias_min, df_max_min] = bias_estimation(pi_afbs, pi_mc_uni)
 bias_min = inf;
 df_max_min = inf;
 
-BIAS_RANGE = max(abs(max(pi_afbs) - max(pi_mc_uni)), abs(min(pi_afbs) - min(pi_mc_uni))) * 1.5;
+pi_max = max([pi_afbs]);
+pi_min = min([pi_afbs]);
+pi_mc_max = max([pi_mc_uni]);
+pi_mc_min = min([pi_mc_uni]);
+
+%BIAS_RANGE = max(abs(max(pi_afbs) - max(pi_mc_uni)), abs(min(pi_afbs) - min(pi_mc_uni))) * 1.5;
+BIAS_UP = abs(pi_max - pi_mc_min) * 2.0;
+BIAS_LOW = -1 * abs(pi_mc_max - pi_min) * 2.0;
 
 % find the best bias
-for bias = -BIAS_RANGE:2 * BIAS_RANGE / 20:BIAS_RANGE
+for bias = BIAS_LOW :(BIAS_UP - BIAS_LOW) / 200 :BIAS_UP
     [f1, x1] = ecdf(pi_afbs);
     [f2, x2] = ecdf(pi_mc_uni + bias);
 
@@ -16,13 +23,13 @@ for bias = -BIAS_RANGE:2 * BIAS_RANGE / 20:BIAS_RANGE
     xx = [];
     df = [];
     
-    for x = x_min:0.0001:x_max  
+    for x = x_min: (x_max - x_min) / 100 :x_max  
         f_d = ecdf_eval(f1, x1, x) - ecdf_eval(f2, x2, x);
         xx = [xx;x];
         df = [df;f_d];
     end
     
-    if (max(abs(df)) < df_max_min && min(df) >= 0)
+    if (max(abs(df)) < df_max_min && min(df) >= -0.001)
         df_max_min = max(abs(df));
         bias_min = bias;
     end
@@ -31,7 +38,7 @@ for bias = -BIAS_RANGE:2 * BIAS_RANGE / 20:BIAS_RANGE
 %     plot(xx, df);
 %     title('bias \beta v.s. d_n')
 %     hold on;
-%     
+    
 %     subplot(2,1,2)
 %     scatter(bias, max(abs(df)), 'bx');
 %     scatter(bias, min(df), 'gx');

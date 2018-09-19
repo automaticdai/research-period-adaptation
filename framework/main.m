@@ -7,17 +7,17 @@
 % Offline run of the method. Used data are pre-calculated.
 % -------------------------------------------------------------------------
 
-addpath('..\data\dataset_b\afbs')
-addpath('..\data\dataset_b\mc')
-
+restoredefaultpath
+addpath(['..\data\dataset_d' num2str(iii) '\afbs'])
+addpath('..\data\dataset_d1\mc')
 
 %% experiment configurations
 % framework parameters
 fw.conf.ph = 1;                       % prediction horizon
-fw.conf.init_period = 1500;           % initial task period is 15 ms
+fw.conf.init_period = 1000;           % initial task period is 15 ms
 fw.conf.step_size = 100;              % period change step in 1 ms
 
-fw.conf.alphad = 0.175;               % degradation factor
+fw.conf.alphad = 0.5;                 % degradation factor
 fw.conf.ci = 0.90;                    % decision confidence interval
 fw.conf.retry_times = 0;              % retry times
 
@@ -35,7 +35,7 @@ fw.traces.bias = [];
 
 
 %% algorithm starts here
-fw.iteration = 1;
+fw.iteration = 0;
 fw.period = fw.conf.init_period;
 
 % make the first prediction
@@ -43,7 +43,8 @@ fw.pi_mc = predict(fw.period);
 
 % make the first obesrvation
 fw.pi_afbs = observe(fw.period);
-fw.j0 = predict_expectation(fw.pi_mc, 0, fw.conf.ci);
+fw.j0 = predict_expectation(fw.pi_afbs, 0, fw.conf.ci);
+%fw.j0 = 0.0547;
 
 fprintf('======================================= \r');
 fprintf('Degradation Factor = %f \r', fw.conf.alphad);
@@ -56,6 +57,7 @@ while (true)
     % bias prediction
     % update model
     [fw.bias, ~] = bias_estimation(fw.pi_afbs, fw.pi_mc);
+    %fw.bias = 0;
     fprintf('Bias: %f \r', fw.bias);
     
     % predict next PI for (T + delta_T)
@@ -70,19 +72,20 @@ while (true)
     
     if (fw.j_expected > fw.j_threshold)
         % stop as expectation is violated
-        sprintf('[End] Due to below expectation \r');
+        fprintf('[End] Due to below expectation \r');
         break;
     else
         % continue and make action, so the system will running at T+delta_T
         % observe system @ T+delta_T
         fw.pi_afbs = observe(fw.period);
         fw.j_actual = predict_expectation(fw.pi_afbs, 0, fw.conf.ci);
+        
         fprintf('Actual: %f \r', fw.j_actual);
         
         % check: PI satisfied??
         if (fw.j_actual > fw.j_threshold)
             % violation
-            sprintf('[End] Due to run-time violation \r');
+            fprintf('[End] Due to run-time violation \r');
             break;
         else
             % commit the change
@@ -94,26 +97,32 @@ while (true)
     fw.traces.bias =[fw.traces.bias fw.bias];
     fw.traces.period = [fw.traces.period; fw.period * 10];
     
-    pip_this = 1 - (fw.j_expected - fw.j0) / fw.j_expected;
+    pip_this = 1 - (fw.j_actual - fw.j0) / fw.j_actual;
     fw.traces.pip = [fw.traces.pip; pip_this];
     
-    pip_mc_this = 1 - (fw.j_actual - fw.j0) / fw.j_actual;
+    pip_mc_this = 1 - (fw.j_expected - fw.j0) / fw.j_expected;
     fw.traces.pip_mc = [fw.traces.pip_mc; pip_mc_this];
 
     fw.iteration = fw.iteration + 1;
     
 end
 
-% plot trace
-subplot(2,1,1)
-plot(fw.traces.period, fw.traces.pip, 'r^-');
-hold on;
-plot(fw.traces.period, fw.traces.pip_mc, 'bx-');
+%% plot trace
+% figure()
+% plot(fw.traces.period, fw.traces.pip, 'r^-');
+% hold on;
+% plot(fw.traces.period, fw.traces.pip_mc, 'bx-');
+% 
+% xlabel('Period')
+% ylabel('PI')
+% legend(['Observed'], ['Predicted'])
+% 
+% figure()
+% plot(1:numel(fw.traces.bias), fw.traces.bias, 'o-');
+% xlabel('# of Iteration')
+% legend(['bias'])
 
-xlabel('T_i')
-ylabel('PI')
-legend(['Observed'], ['Predicted'])
-
-subplot(2,1,2)
-plot(fw.traces.period, fw.traces.bias, 'o-');
-legend(['bias'])
+%% save to file
+filename = ['./result/d' num2str(iii)];
+fw_traces = fw.traces;
+save([filename '.mat'], 'fw_traces')

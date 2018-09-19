@@ -1,5 +1,5 @@
 
-dataset_path = ['./dataset_d3'];
+dataset_path = ['./dataset_d7'];
 
 for Ti = 1000:100:4000
 	filename = [dataset_path '/logs/log' num2str(Ti) '.log'];
